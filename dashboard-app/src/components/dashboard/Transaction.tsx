@@ -1,3 +1,5 @@
+import { ArrowUpDown } from "lucide-react";
+
 export default function Transaction() {
   return (
     <div
@@ -8,7 +10,9 @@ export default function Transaction() {
         <div>
           <h2 className="text-lg font-semibold">Latest Spending</h2>
         </div>
-        <div>icon</div>
+        <div>
+          <ArrowUpDown />
+        </div>
       </div>
       <div
         id="body"
