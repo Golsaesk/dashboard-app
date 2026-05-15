@@ -41,3 +41,4 @@ export default function MenuContent({ items, onClose, isOpen }: props) {
     </>
   )
 }
+
