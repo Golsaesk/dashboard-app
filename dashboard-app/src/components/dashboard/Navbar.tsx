@@ -3,9 +3,21 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import MenuContent from './MenuContent'
 import { menuItems } from '@/data/menu.config'
+import { usePathname } from 'next/navigation'
+
+const titles: Record<string, string> = {
+  '/': 'Dashboard',
+  '/reports': 'Reports',
+  '/income': 'Income',
+  '/outcome': 'Outcome',
+  '/settings': 'Settings',
+  '/profile': 'Profile',
+}
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false),
+    pathname = usePathname(),
+    title = titles[pathname] || 'Dashboard'
 
   function HandleToggleMenu() {
     setIsMenuOpen((prev) => !prev)
@@ -15,9 +27,9 @@ export default function Navbar() {
   }
 
   return (
-    <div className="flex items-center justify-between bg-gray-100 p-6 text-white">
+    <div className="flex items-center justify-between p-6 text-white">
       <div>
-        <h1 className="text-2xl font-bold text-black">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-black">{title}</h1>
       </div>
       <div className="hover text-black" onClick={HandleToggleMenu}>
         <Menu className="hover:text-green text-gray-500 transition-colors" />
