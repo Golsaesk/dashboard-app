@@ -3,7 +3,7 @@ type Props = {
 }
 export default function SummaryCards({ items }: Props) {
   return (
-    <>
+    <div className="grid grid-cols-2 gap-4 w-full ">
       {items.map((item) => {
         const isPositive = item.compared >= 0
 
@@ -37,6 +37,6 @@ export default function SummaryCards({ items }: Props) {
           </div>
         )
       })}
-    </>
+    </div>
   )
 }

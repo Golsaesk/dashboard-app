@@ -1,7 +1,9 @@
-import CategoryChart from '@/components/reports/CategoryChart'
+
 import { reportItems } from '@/data/reports/reportCarts.config'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import SpendingTrendChart from '@/components/reports/SpendingTrendChart'
+import CategoryChart from '@/components/charts/CategoryChart'
+import { reportCategory } from '@/data/reports/reportCategory.conf'
 
 export default function ReportsPage() {
   return (
@@ -14,7 +16,7 @@ export default function ReportsPage() {
         <SummaryCards items={reportItems} />
       </div>
       <div>
-        <CategoryChart />
+        <CategoryChart data={reportCategory} />
       </div>
       <div>
         <SpendingTrendChart />
