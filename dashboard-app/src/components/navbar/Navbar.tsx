@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Menu } from 'lucide-react'
 import MenuContent from './MenuContent'
 import { usePathname } from 'next/navigation'
-import { menuItems } from '@/data/menu.config'
+import { menuItems } from '@/data/menu/menu.config'
 
 const titles: Record<string, string> = {
   '/': 'Dashboard',

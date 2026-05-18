@@ -23,7 +23,7 @@ export default function FinanceChart() {
   const [metric, setMetric] = useState('cost')
 
   return (
-    <div className="flex w-full items-center gap-4 bg-gray-100 p-6 text-gray-800">
+    <div className="flex w-full items-center gap-4 p-6 text-gray-800">
       <div className="w-full">
         {/* 🎛️ فیلتر */}
         <div className="mb-4 flex justify-between">

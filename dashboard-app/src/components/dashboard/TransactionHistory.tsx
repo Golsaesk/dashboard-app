@@ -1,4 +1,4 @@
-import { TransactionType } from '@/data/transactionhistory'
+import { TransactionType } from '@/data/transactions/transactionhistory'
 
 type props = {
   items: TransactionType[]
@@ -9,7 +9,10 @@ export default function TransactionHistory({ items }: props) {
     <>
       {items.map((item) => {
         return (
-          <div className="flex w-full items-center justify-between rounded-xl border border-gray-200 p-2">
+          <div
+            key={item.id}
+            className="flex w-full items-center justify-between rounded-xl border border-gray-200 p-2"
+          >
             <div className="flex w-1/3 items-center gap-4">
               <div className="h-12 w-12 rounded-full bg-gray-500"></div>
               <div className="flex flex-col items-start gap-1">

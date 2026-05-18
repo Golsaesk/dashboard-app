@@ -1,4 +1,4 @@
-import { MenuItem } from '@/data/menu'
+import { MenuItem } from '@/data/menu/menu'
 import { useRouter } from 'next/navigation'
 
 type props = {
@@ -41,4 +41,3 @@ export default function MenuContent({ items, onClose, isOpen }: props) {
     </>
   )
 }
-

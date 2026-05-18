@@ -10,7 +10,7 @@ export const transactionItems: TransactionType[] = [
   {
     id: 2,
     amount: 23.5,
-    name: 'food',
+    name: 'house',
     date: '2024-06-01',
   },
   {

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { ArrowUpDown } from 'lucide-react'
 import TransactionForm from './TransactionForm'
 import TransactionHistory from './TransactionHistory'
-import { transactionItems } from '@/data/transactionhistory.config'
+import { transactionItems } from '@/data/transactions/transactionhistory.config'
 
 export default function Transaction() {
   const [transactions, setTransactions] = useState(false)
@@ -14,7 +14,7 @@ export default function Transaction() {
   return (
     <div
       id="transactions"
-      className="flex flex-col items-center gap-4 bg-gray-100 p-6 text-gray-800"
+      className="flex flex-col items-center gap-4 p-6 text-gray-800"
     >
       <div id="top" className="flex w-full items-center justify-between">
         <div>
