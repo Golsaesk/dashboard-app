@@ -1,11 +1,17 @@
-import CategoryChart from '@/components/charts/CategoryChart'
+'use client'
+
 import GoalChart from '@/components/income/GoalChart'
-import IncomeHistory from '@/components/income/IncomeHistory'
+import { useFinanceStore } from '@/store/financeStore'
+import CategoryChart from '@/components/charts/CategoryChart'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import { dashboardItems } from '@/data/dashboard/dashboard.config'
 import { reportCategory } from '@/data/reports/reportCategory.conf'
-import { transactionItems } from '@/data/transactions/transactionhistory.config'
+import TransactionHistory from '@/components/transaction/TransactionHistory'
+
 export default function IncomePage() {
+  const transactions = useFinanceStore((state) => state.transactions),
+    income = transactions.filter((t) => t.type === 'income')
+
   return (
     <>
       <div className="grid grid-cols-2 gap-4 px-6">
@@ -13,7 +19,7 @@ export default function IncomePage() {
       </div>
       <GoalChart value={75} />
       <CategoryChart data={reportCategory} />
-      <IncomeHistory items={transactionItems} />
+      <TransactionHistory items={income} />
     </>
   )
 }

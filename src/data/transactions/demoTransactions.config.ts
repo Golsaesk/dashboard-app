@@ -6,7 +6,7 @@ export const demoTransactions: Transaction[] = [
     title: 'Salary',
     amount: 5000,
     type: 'income',
-    createdAt: '2026-05-01',
+    date: '2026-05-01',
   },
 
   {
@@ -14,7 +14,7 @@ export const demoTransactions: Transaction[] = [
     title: 'Groceries',
     amount: 300,
     type: 'outcome',
-    createdAt: '2026-05-02',
+    date: '2026-05-02',
   },
 
   {
@@ -22,6 +22,6 @@ export const demoTransactions: Transaction[] = [
     title: 'Freelance Project',
     amount: 1200,
     type: 'income',
-    createdAt: '2026-05-05',
+    date: '2026-05-05',
   },
 ]

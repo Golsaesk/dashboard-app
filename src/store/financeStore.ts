@@ -1,6 +1,5 @@
 import { create } from 'zustand'
 import { Transaction } from '@/type/transaction'
-import { demoTransactions } from '@/data/transactions/demoTransactions.config'
 
 type FinanceStore = {
   transactions: Transaction[]
@@ -13,7 +12,15 @@ type FinanceStore = {
 }
 
 export const useFinanceStore = create<FinanceStore>((set) => ({
-  transactions: demoTransactions,
+  transactions: [
+    {
+      id: '1',
+      name: 'Salary',
+      amount: 5000,
+      date: '2026-01-01',
+      type: 'income',
+    },
+  ],
 
   addTransaction: (transaction) =>
     set((state) => ({

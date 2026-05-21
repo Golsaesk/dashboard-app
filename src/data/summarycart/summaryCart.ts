@@ -1,8 +1,8 @@
 import { LucideIcon } from "lucide-react"
 
-export type DashboardItem = {
+export type SummaryCartsItem = {
+  compared: number
+  icon?: LucideIcon
   name: string
   total: number
-  compared: number
-  icon: LucideIcon
 }

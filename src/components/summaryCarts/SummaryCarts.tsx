@@ -1,9 +1,12 @@
+import { SummaryCartsItem } from '@/data/summarycart/summaryCart'
+import { ArrowDown, ArrowUp } from 'lucide-react'
+
 type Props = {
   items: SummaryCartsItem[]
 }
 export default function SummaryCards({ items }: Props) {
   return (
-    <div className="grid grid-cols-2 gap-4 w-full ">
+    <div className="grid w-full grid-cols-2 gap-4">
       {items.map((item) => {
         const isPositive = item.compared >= 0
 
@@ -12,7 +15,10 @@ export default function SummaryCards({ items }: Props) {
             key={item.name}
             className="flex flex-col rounded-3xl border border-zinc-200 p-4 shadow-sm"
           >
-            <p className="text-sm text-zinc-500">{item.name}</p>
+            <div className="flex items-center gap-2">
+              {item.icon && <item.icon className="h-6 w-6 text-zinc-500" />}
+              <p className="text-sm text-zinc-500">{item.name}</p>
+            </div>
 
             <h3 className="mt-3 text-lg font-bold text-zinc-900">
               {new Intl.NumberFormat('en-US', {
@@ -26,13 +32,17 @@ export default function SummaryCards({ items }: Props) {
                 isPositive ? 'text-[#0AA165]' : 'text-red-500'
               }`}
             >
-              <span>
-                {isPositive ? '+' : ''}
+              <div className="flex items-center gap-1">
+                {isPositive ? (
+                  <ArrowUp className="size-4 text-green-500" />
+                ) : (
+                  <ArrowDown className="size-4 text-red-500" />
+                )}
                 {new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
                 }).format(item.compared)}
-              </span>
+              </div>
             </div>
           </div>
         )

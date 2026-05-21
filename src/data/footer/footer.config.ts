@@ -22,6 +22,7 @@ export const footerItems: FooterItem[] = [
     lable: '',
     path: '/add',
     icon: CirclePlus,
+    type: 'add',
   },
   {
     lable: 'Income',

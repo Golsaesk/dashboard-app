@@ -1,9 +1,9 @@
-import CategoryChart from '@/components/charts/CategoryChart'
 import GoalChart from '@/components/income/GoalChart'
-import IncomeHistory from '@/components/income/IncomeHistory'
+import CategoryChart from '@/components/charts/CategoryChart'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import { dashboardItems } from '@/data/dashboard/dashboard.config'
 import { reportCategory } from '@/data/reports/reportCategory.conf'
+import TransactionHistory from '@/components/transaction/TransactionHistory'
 import { transactionItems } from '@/data/transactions/transactionhistory.config'
 
 export default function OutcomePage() {
@@ -14,7 +14,7 @@ export default function OutcomePage() {
       </div>
       <GoalChart value={75} />
       <CategoryChart data={reportCategory} />
-      <IncomeHistory items={transactionItems} />
+      <TransactionHistory items={transactionItems} />
     </>
   )
 }
