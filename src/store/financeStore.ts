@@ -5,9 +5,7 @@ type FinanceStore = {
   transactions: Transaction[]
 
   addTransaction: (transaction: Transaction) => void
-
   removeTransaction: (id: string) => void
-
   updateTransaction: (updatedTransaction: Transaction) => void
 }
 
@@ -24,22 +22,18 @@ export const useFinanceStore = create<FinanceStore>((set) => ({
 
   addTransaction: (transaction) =>
     set((state) => ({
-      transactions: [...state.transactions, transaction],
+      transactions: [transaction, ...state.transactions],
     })),
 
   removeTransaction: (id) =>
     set((state) => ({
-      transactions: state.transactions.filter(
-        (transaction) => transaction.id !== id,
-      ),
+      transactions: state.transactions.filter((t) => t.id !== id),
     })),
 
-  updateTransaction: (updatedTransaction) =>
+  updateTransaction: (updated) =>
     set((state) => ({
-      transactions: state.transactions.map((transaction) =>
-        transaction.id === updatedTransaction.id
-          ? updatedTransaction
-          : transaction,
+      transactions: state.transactions.map((t) =>
+        t.id === updated.id ? updated : t,
       ),
     })),
 }))

@@ -7,10 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useFinanceStore } from '@/store/financeStore'
-import {
-  transactionSchema,
-  TransactionSchemaType,
-} from '@/schema/transaction.schema'
+
 import {
   Form,
   FormControl,
@@ -19,6 +16,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+
 import {
   Select,
   SelectContent,
@@ -27,8 +25,14 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 
+import {
+  transactionSchema,
+  TransactionSchemaType,
+} from '@/schema/transaction.schema'
+
 export function TransactionForm() {
-  const form = useForm<TransactionSchemaType>({
+  const addTransaction = useFinanceStore((state) => state.addTransaction),
+    form = useForm<TransactionSchemaType>({
       resolver: zodResolver(transactionSchema),
 
       defaultValues: {
@@ -40,23 +44,36 @@ export function TransactionForm() {
         date: new Date(),
         attachment: undefined,
       },
-    }),
-    addTransaction = useFinanceStore((state) => state.addTransaction)
+    })
 
-  async function onSubmit(values: TransactionSchemaType) {
+  function onSubmit(values: TransactionSchemaType) {
     addTransaction({
       id: uuid(),
       name: values.category,
-      amount: values.amount,
-      date: new Date(values.date).toISOString(),
+      amount: Number(values.amount), // ✅ FIX 1
+      date:
+        values.date instanceof Date
+          ? values.date.toISOString()
+          : new Date(values.date).toISOString(), // ✅ FIX 2
       type: values.type,
+    })
+
+    form.reset({
+      // ✅ FIX 3
+      amount: 0,
+      category: '',
+      source: '',
+      note: '',
+      type: 'income',
+      date: new Date(),
+      attachment: undefined,
     })
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-        {/* type */}
+        {/* TYPE */}
         <FormField
           control={form.control}
           name="type"
@@ -81,13 +98,11 @@ export function TransactionForm() {
                   Outcome
                 </Button>
               </div>
-
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* amount */}
+        {/* AMOUNT */}
         <FormField
           control={form.control}
           name="amount"
@@ -96,7 +111,13 @@ export function TransactionForm() {
               <FormLabel>Amount</FormLabel>
 
               <FormControl>
-                <Input type="number" placeholder="100" {...field} />
+                <Input
+                  type="number"
+                  value={field.value}
+                  onChange={
+                    (e) => field.onChange(Number(e.target.value)) // ✅ FIX 4
+                  }
+                />
               </FormControl>
 
               <FormMessage />
@@ -104,7 +125,7 @@ export function TransactionForm() {
           )}
         />
 
-        {/* category */}
+        {/* CATEGORY */}
         <FormField
           control={form.control}
           name="category"
@@ -112,7 +133,7 @@ export function TransactionForm() {
             <FormItem>
               <FormLabel>Category</FormLabel>
 
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
@@ -121,19 +142,15 @@ export function TransactionForm() {
 
                 <SelectContent>
                   <SelectItem value="food">Food</SelectItem>
-
                   <SelectItem value="salary">Salary</SelectItem>
-
                   <SelectItem value="shopping">Shopping</SelectItem>
                 </SelectContent>
               </Select>
-
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* source */}
+        {/* SOURCE */}
         <FormField
           control={form.control}
           name="source"
@@ -141,7 +158,7 @@ export function TransactionForm() {
             <FormItem>
               <FormLabel>Source</FormLabel>
 
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select source" />
@@ -150,44 +167,15 @@ export function TransactionForm() {
 
                 <SelectContent>
                   <SelectItem value="cash">Cash</SelectItem>
-
                   <SelectItem value="bank">Bank</SelectItem>
-
                   <SelectItem value="wallet">Wallet</SelectItem>
                 </SelectContent>
               </Select>
-
-              <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* date */}
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date</FormLabel>
-
-              <FormControl>
-                <Input
-                  type="date"
-                  value={
-                    field.value
-                      ? new Date(field.value).toISOString().split('T')[0]
-                      : ''
-                  }
-                  onChange={(e) => field.onChange(new Date(e.target.value))}
-                />
-              </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* note */}
+        {/* NOTE */}
         <FormField
           control={form.control}
           name="note"
@@ -196,30 +184,8 @@ export function TransactionForm() {
               <FormLabel>Note</FormLabel>
 
               <FormControl>
-                <Textarea placeholder="write note..." {...field} />
+                <Textarea {...field} />
               </FormControl>
-
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* attachment */}
-        <FormField
-          control={form.control}
-          name="attachment"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Attachment</FormLabel>
-
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => field.onChange(e.target.files?.[0])}
-                />
-              </FormControl>
-
-              <FormMessage />
             </FormItem>
           )}
         />
