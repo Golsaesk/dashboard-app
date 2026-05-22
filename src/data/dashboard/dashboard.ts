@@ -1,8 +1,0 @@
-import { LucideIcon } from "lucide-react"
-
-export type DashboardItem = {
-  name: string
-  total: number
-  compared: number
-  icon: LucideIcon
-}

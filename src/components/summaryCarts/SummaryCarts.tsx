@@ -8,7 +8,8 @@ export default function SummaryCards({ items }: Props) {
   return (
     <div className="grid w-full grid-cols-2 gap-4">
       {items.map((item) => {
-        const isPositive = item.compared >= 0
+        const compared = item.compared ?? 0
+        const isPositive = compared >= 0
 
         return (
           <div
@@ -21,10 +22,12 @@ export default function SummaryCards({ items }: Props) {
             </div>
 
             <h3 className="mt-3 text-lg font-bold text-zinc-900">
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-              }).format(item.total)}
+              {item.value
+                ? item.value
+                : new Intl.NumberFormat('en-US', {
+                    style: 'currency',
+                    currency: 'USD',
+                  }).format(item.total || 0)}
             </h3>
 
             <div
@@ -41,7 +44,7 @@ export default function SummaryCards({ items }: Props) {
                 {new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: 'USD',
-                }).format(item.compared)}
+                }).format(compared)}
               </div>
             </div>
           </div>
