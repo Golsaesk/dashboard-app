@@ -3,24 +3,28 @@
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 type Props = {
-  value: number // مثلا 83
+  goal: {
+    title: string
+    target_amount: number
+  }
+  saved: number
 }
 
-export default function GoalChart({ value }: Props) {
+export default function GoalChart({ goal, saved }: Props) {
+  const percent = Math.min(Math.round((saved / goal.target_amount) * 100), 100)
+
   const data = [
-    { name: 'progress', value },
-    { name: 'rest', value: 100 - value },
+    { name: 'progress', value: percent },
+    { name: 'rest', value: 100 - percent },
   ]
 
   const COLORS = ['#0AA165', '#E5E7EB']
 
   return (
     <div className="flex items-center justify-between gap-8 p-6">
-      {/* بخش چارت */}
+      {/* CHART */}
       <div className="flex flex-col items-start">
-        <span className="mb-2 text-sm text-zinc-500">
-          How close are you to your goal?
-        </span>
+        <span className="mb-2 text-sm text-zinc-500">{goal.title}</span>
 
         <div className="relative h-64 w-64">
           <ResponsiveContainer width="100%" height="100%">
@@ -41,33 +45,32 @@ export default function GoalChart({ value }: Props) {
             </PieChart>
           </ResponsiveContainer>
 
-          {/* وسط دایره */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <p className="text-3xl font-bold text-zinc-900">{value}%</p>
+            <p className="text-3xl font-bold text-zinc-900">{percent}%</p>
             <p className="text-sm text-zinc-500">Completed</p>
           </div>
         </div>
       </div>
 
-      {/* بخش اطلاعات */}
+      {/* INFO */}
       <div className="flex flex-col items-start gap-3 text-left text-zinc-700">
         <div>
-          <p className="text-sm text-zinc-500">Monthly Goal</p>
+          <p className="text-sm text-zinc-500">Goal</p>
           <p className="text-2xl font-semibold text-zinc-900">
             {new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'USD',
-            }).format(5000)}
+            }).format(goal.target_amount)}
           </p>
         </div>
 
         <div>
-          <p className="text-sm text-zinc-500">You've Earned</p>
+          <p className="text-sm text-zinc-500">Saved</p>
           <p className="text-xl font-medium text-zinc-900">
             {new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: 'USD',
-            }).format(1000)}
+            }).format(saved)}
           </p>
         </div>
 
