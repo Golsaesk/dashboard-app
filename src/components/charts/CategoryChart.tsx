@@ -2,7 +2,6 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
-
 type Props = {
   title?: string
   totalLabel?: string
@@ -16,22 +15,18 @@ export default function CategoryAnalysisCard({
   period = 'This Month',
   data,
 }: Props) {
-  const total = data.reduce((acc, item) => acc + item.value, 0)
+  const total = data.reduce((a, b) => a + b.value, 0)
 
   return (
-    <div className="w-full max-w-[700px] rounded-2xl border bg-white p-6 shadow-sm">
-      {/* Header */}
+    <div className="w-full rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-semibold text-black">{title}</h2>
-
-        <button className="rounded-xl border px-4 py-2 text-sm text-gray-700">
+        <h2 className="text-xl font-semibold text-zinc-900">{title}</h2>
+        <button className="rounded-2xl border border-zinc-200 px-4 py-2 text-sm text-zinc-600 transition hover:border-zinc-300 hover:text-zinc-900">
           {period}
         </button>
       </div>
-
       <div className="flex flex-col gap-8 md:flex-row md:items-center">
-        {/* Chart */}
-        <div className="relative h-[250px] w-[250px]">
+        <div className="relative h-64 w-64">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
@@ -39,49 +34,39 @@ export default function CategoryAnalysisCard({
                 dataKey="value"
                 innerRadius={70}
                 outerRadius={100}
-                paddingAngle={2}
-                stroke="none"
               >
-                {data.map((entry, index) => (
-                  <Cell key={index} fill={entry.color} />
+                {data.map((d, i) => (
+                  <Cell key={i} fill={d.color} />
                 ))}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-
-          {/* Center Text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <h3 className="text-3xl font-bold">${total.toLocaleString()}</h3>
-
-            <p className="text-gray-500">{totalLabel}</p>
+            <p className="text-3xl font-bold text-zinc-900">
+              ${total.toLocaleString()}
+            </p>
+            <p className="text-sm text-zinc-500">{totalLabel}</p>
           </div>
         </div>
-
-        {/* Legend */}
-        <div className="flex-1 space-y-5">
+        <div className="flex-1 space-y-3">
           {data.map((item) => {
             const percent = ((item.value / total) * 100).toFixed(0)
-
             return (
               <div
                 key={item.name}
-                className="flex items-center justify-between"
+                className="flex items-center justify-between rounded-xl px-2 py-2 transition hover:bg-zinc-50"
               >
                 <div className="flex items-center gap-3">
-                  <div
+                  <span
                     className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: item.color }}
+                    style={{ background: item.color }}
                   />
-
-                  <span className="text-gray-700">{item.name}</span>
+                  <span className="text-sm text-zinc-700">{item.name}</span>
                 </div>
 
-                <div className="flex items-center gap-8">
-                  <span className="w-10 text-right text-gray-500">
-                    {percent}%
-                  </span>
-
-                  <span className="w-20 text-right font-medium">
+                <div className="flex gap-6 text-sm">
+                  <span className="text-zinc-500">{percent}%</span>
+                  <span className="font-medium text-zinc-900">
                     ${item.value.toLocaleString()}
                   </span>
                 </div>

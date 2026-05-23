@@ -1,8 +1,11 @@
 'use client'
+
 import Footer from '@/components/footer/Footer'
 import Navbar from '@/components/navbar/Navbar'
 import { footerItems } from '@/data/footer/footer.config'
-import { QueryProvider } from '@/providers/query-provider'
+import { ProtectedRoute } from '@/components/protectedRoute/ProtectedRoute'
+import MenuContent from '@/components/navbar/MenuContent'
+import { menuItems } from '@/data/menu/menu.config'
 
 export default function MainLayout({
   children,
@@ -10,14 +13,22 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="max-auto p-auto mx-auto flex min-h-screen w-full max-w-full flex-col md:max-w-3xl lg:max-w-5xl">
-      <Navbar />
+    <div className="flex min-h-screen w-full bg-zinc-50">
+      {/* 🧠 SIDEBAR (desktop only) */}
+      <aside className="hidden lg:block lg:w-64">
+        <MenuContent items={menuItems} isOpen={true} onClose={() => {}} />
+      </aside>
 
-      <main className="flex-1 pb-16">
-        <QueryProvider>{children}</QueryProvider>
-      </main>
+      {/* 🧠 MAIN CONTENT */}
+      <div className="flex flex-1 flex-col">
+        <Navbar />
 
-      <Footer items={footerItems} />
+        <main className="flex-1 pb-16">
+          <ProtectedRoute>{children}</ProtectedRoute>
+        </main>
+
+        <Footer items={footerItems} />
+      </div>
     </div>
   )
 }

@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react'
 import { getCategoryChartData } from '@/helper/chart'
-import GoalChart from '@/components/income/GoalChart'
 import { useFinanceStore } from '@/store/financeStore'
 import { getOutcomeSummary } from '@/config/outcomeSummry'
 import CategoryChart from '@/components/charts/CategoryChart'
@@ -11,25 +10,36 @@ import TransactionHistory from '@/components/transaction/TransactionHistory'
 
 export default function OutcomePage() {
   const transactions = useFinanceStore((state) => state.transactions),
-    outcome = useMemo(() => {
-      return transactions.filter((t) => t.type === 'outcome')
-    }, [transactions]),
-    summaryItems = getOutcomeSummary(transactions),
-    outcomeTransactions = transactions.filter((t) => t.type === 'outcome'),
-    chartData = getCategoryChartData(outcomeTransactions)
+    outcomeTransactions = useMemo(
+      () => transactions.filter((t) => t.type === 'outcome'),
+      [transactions],
+    ),
+    summaryItems = useMemo(
+      () => getOutcomeSummary(transactions),
+      [transactions],
+    ),
+    chartData = useMemo(
+      () => getCategoryChartData(outcomeTransactions),
+      [outcomeTransactions],
+    )
 
   return (
-    <>
-      <div className="grid grid-cols-2 gap-4 px-6">
-        <SummaryCards items={summaryItems} />
+    <main className="min-h-screen bg-zinc-50 px-4 py-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <SummaryCards items={summaryItems} />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <CategoryChart
+            title="Outcome Categories"
+            totalLabel="Total Outcome"
+            data={chartData}
+          />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <TransactionHistory items={outcomeTransactions} />
+        </section>
       </div>
-      <GoalChart value={75} />
-      <CategoryChart
-        title="Outcome Categories"
-        totalLabel="Total Outcome"
-        data={chartData}
-      />
-      <TransactionHistory items={outcome} />
-    </>
+    </main>
   )
 }

@@ -10,12 +10,18 @@ export default function DashboardPage() {
     summaryItems = getDashboardSummary(transactions)
 
   return (
-    <>
-      <div className="p-6">
-        <SummaryCards items={summaryItems} />
+    <main className="min-h-screen px-4 py-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl">
+          <SummaryCards items={summaryItems} />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl">
+          <Chart />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-xl">
+          <Transaction />
+        </section>
       </div>
-      <Chart />
-      <Transaction />
-    </>
+    </main>
   )
 }

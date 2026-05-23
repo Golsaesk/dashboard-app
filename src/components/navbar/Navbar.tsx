@@ -1,8 +1,10 @@
 'use client'
-import { useState } from 'react'
-import MenuContent from './MenuContent'
-import { Bell, Menu } from 'lucide-react'
+
+import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
+import { Bell, Menu } from 'lucide-react'
+import { supabase } from '@/lib/supabase/client'
+import MenuContent from './MenuContent'
 import { menuItems } from '@/data/menu/menu.config'
 
 const titles: Record<string, string> = {
@@ -15,46 +17,65 @@ const titles: Record<string, string> = {
 }
 
 export default function Navbar() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false),
-    pathname = usePathname(),
-    title = titles[pathname] || 'Dashboard'
+  const [open, setOpen] = useState(false)
+  const [userName, setUserName] = useState('')
+  const pathname = usePathname()
 
-  function HandleToggleMenu() {
-    setIsMenuOpen((prev) => !prev)
-  }
-  function closeMenu() {
-    setIsMenuOpen(false)
-  }
+  const title = titles[pathname] || 'Dashboard'
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const { data } = await supabase.auth.getSession()
+      const user = data.session?.user
+
+      if (user) {
+        setUserName(
+          user.user_metadata?.full_name ||
+            user.user_metadata?.name ||
+            user.email?.split('@')[0] ||
+            'User',
+        )
+      }
+    }
+
+    loadUser()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        const user = session?.user
+        setUserName(user?.email?.split('@')[0] || 'Guest')
+      },
+    )
+
+    return () => listener.subscription.unsubscribe()
+  }, [])
 
   return (
-    <div className="flex items-center justify-between p-6 text-white">
-      <div className="flex items-center gap-6">
-        <div className="hover text-black" onClick={HandleToggleMenu}>
-          <Menu
-            size={24}
-            className="hover:text-green text-gray-500 transition-colors"
-          />
-          <div
-            className={`fixed top-0 right-0 h-full w-full transform bg-white shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'translate-x-0' : 'translate-x-full'} `}
-          >
-            <MenuContent
-              items={menuItems}
-              isOpen={isMenuOpen}
-              onClose={closeMenu}
-            />
-          </div>
-        </div>
+    <header className="flex items-center justify-between px-6 py-5">
+      {/* LEFT */}
+      <div className="flex items-center gap-3">
+        {/* MOBILE MENU BUTTON */}
+        <button onClick={() => setOpen(true)} className="lg:hidden">
+          <Menu className="text-zinc-600" />
+        </button>
+
         <div>
-          <h1 className="text-2xl font-bold text-black">{title}</h1>
-          <p className="text-sm text-gray-500">Welcome back, John Doe!👋</p>
+          <h1 className="text-xl font-bold text-zinc-900">{title}</h1>
+          <p className="text-sm text-zinc-500">
+            Welcome back, {userName || '...'} 👋
+          </p>
         </div>
       </div>
-      <div>
-        <Bell
-          size={24}
-          className="hover:text-green text-gray-500 transition-colors"
-        />
-      </div>
-    </div>
+
+      <Bell className="text-zinc-500" />
+
+      {/* MOBILE DRAWER ONLY */}
+      <MenuContent
+        items={menuItems}
+        isOpen={open}
+        onClose={() => setOpen(false)}
+        mode="mobile"
+      />
+    </header>
   )
 }

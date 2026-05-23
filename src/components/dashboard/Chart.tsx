@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { useFinanceStore } from '@/store/financeStore'
 import {
   LineChart,
   Line,
@@ -11,54 +12,72 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 
-const allData = [
-  { month: 'Jan', cost: 400, income: 800, balance: 400 },
-  { month: 'Feb', cost: 300, income: 700, balance: 400 },
-  { month: 'Mar', cost: 600, income: 900, balance: 300 },
-  { month: 'Apr', cost: 200, income: 500, balance: 300 },
-  { month: 'May', cost: 500, income: 1000, balance: 500 },
+type Metric = 'cost' | 'income' | 'balance'
+
+const tabs: { key: Metric; label: string }[] = [
+  { key: 'cost', label: 'Cost' },
+  { key: 'income', label: 'Income' },
+  { key: 'balance', label: 'Balance' },
 ]
 
 export default function FinanceChart() {
-  const [metric, setMetric] = useState('cost')
+  const { transactions } = useFinanceStore(),
+    [metric, setMetric] = useState<Metric>('cost'),
+    data = useMemo(() => {
+      const map: Record<string, any> = {}
+      for (const t of transactions) {
+        if (!t?.date) continue
+        const d = new Date(t.date)
+        if (isNaN(d.getTime())) continue
+        const month = d.toLocaleString('en-US', { month: 'short' })
+        if (!map[month]) {
+          map[month] = { month, cost: 0, income: 0, balance: 0 }
+        }
+        const amount = t.amount ?? 0
+        if (t.type === 'income') {
+          map[month].income += amount
+          map[month].balance += amount
+        } else {
+          map[month].cost += amount
+          map[month].balance -= amount
+        }
+      }
+
+      return Object.values(map)
+    }, [transactions])
 
   return (
-    <div className="flex w-full items-center gap-4 p-6 text-gray-800">
-      <div className="w-full">
-        {/* 🎛️ فیلتر */}
-        <div className="mb-4 flex justify-between">
-          <button onClick={() => setMetric('cost')} className="px-3 py-1">
-            Cost
-          </button>
-          <button onClick={() => setMetric('income')} className="px-3 py-1">
-            Income
-          </button>
+    <div className="space-y-5">
+      <div className="flex flex-wrap gap-2">
+        {tabs.map((t) => (
           <button
-            onClick={() => setMetric('balance')}
-            className="rounded bg-green-500 px-3 py-1 text-white"
+            key={t.key}
+            onClick={() => setMetric(t.key)}
+            className={`rounded-2xl border px-4 py-2 text-sm transition ${
+              metric === t.key
+                ? 'border-[#0AA165] bg-[#0AA165] text-white'
+                : 'border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300'
+            }`}
           >
-            Balance
+            {t.label}
           </button>
-        </div>
-
-        {/* 📊 Chart */}
-        <div className="h-80">
-          <ResponsiveContainer>
-            <LineChart data={allData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-
-              <Line
-                type="monotone"
-                dataKey={metric}
-                stroke="#3b82f6"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        ))}
+      </div>
+      <div className="h-72 w-full sm:h-80">
+        <ResponsiveContainer>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
+            <Line
+              type="monotone"
+              dataKey={metric}
+              stroke="#0AA165"
+              strokeWidth={2}
+            />
+          </LineChart>
+        </ResponsiveContainer>
       </div>
     </div>
   )

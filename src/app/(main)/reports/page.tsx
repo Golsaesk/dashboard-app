@@ -11,25 +11,25 @@ export default function ReportsPage() {
   const transactions = useFinanceStore((state) => state.transactions),
     summaryItems = getReportSummary(transactions),
     chartData = getCategoryChartData(transactions)
-  return (
-    <div>
-      <h2 className="px-6 py-4 text-lg font-bold text-black">
-        Monthly Overview
-      </h2>
 
-      <div className="grid grid-cols-2 gap-4 px-6">
-        <SummaryCards items={summaryItems} />
+  return (
+    <main className="min-h-screen px-4 py-8">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <h2 className="text-xl font-bold text-zinc-900">Monthly Overview</h2>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <SummaryCards items={summaryItems} />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <CategoryChart
+            title="Financial Report"
+            totalLabel="Total Transactions"
+            data={chartData}
+          />
+        </section>
+        <section className="rounded-3xl border border-zinc-200 bg-white p-6 shadow-2xl">
+          <SpendingTrendChart />
+        </section>
       </div>
-      <div>
-        <CategoryChart
-          title="Financial Report"
-          totalLabel="Total Transactions"
-          data={chartData}
-        />
-      </div>
-      <div>
-        <SpendingTrendChart />
-      </div>
-    </div>
+    </main>
   )
 }
