@@ -57,14 +57,12 @@ export function TransactionForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* TYPE */}
         <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Type</FormLabel>
-
               <div className="flex gap-3">
                 <Button
                   type="button"
@@ -74,7 +72,6 @@ export function TransactionForm() {
                 >
                   Income
                 </Button>
-
                 <Button
                   type="button"
                   variant={field.value === 'outcome' ? 'default' : 'outline'}
@@ -87,8 +84,6 @@ export function TransactionForm() {
             </FormItem>
           )}
         />
-
-        {/* AMOUNT */}
         <FormField
           control={form.control}
           name="amount"
@@ -108,7 +103,6 @@ export function TransactionForm() {
           )}
         />
 
-        {/* CATEGORY */}
         <FormField
           control={form.control}
           name="category"

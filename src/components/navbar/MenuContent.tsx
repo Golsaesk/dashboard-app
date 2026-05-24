@@ -2,6 +2,7 @@
 
 import { MenuItem } from '@/data/menu/menu'
 import { useRouter, usePathname } from 'next/navigation'
+import { AddTransactionSheet } from '../transaction/AddTransactionSheet'
 
 type Props = {
   items: MenuItem[]
@@ -12,7 +13,7 @@ type Props = {
 
 export default function MenuContent({ items, isOpen, onClose, mode }: Props) {
   const router = useRouter(),
-  pathname = usePathname()
+    pathname = usePathname()
   if (!Array.isArray(items)) return null
   if (mode === 'mobile') {
     return (
@@ -37,14 +38,7 @@ export default function MenuContent({ items, isOpen, onClose, mode }: Props) {
                 const active = pathname === item.path
 
                 return (
-                  <button
-                    key={i}
-                    className={`${
-                      active
-                        ? 'bg-green-600 text-white'
-                        : 'text-zinc-700 hover:bg-zinc-100'
-                    }`}
-                  >
+                  <button key={i} className="">
                     <Icon size={20} />
                     {item.label}
                   </button>
@@ -70,20 +64,16 @@ export default function MenuContent({ items, isOpen, onClose, mode }: Props) {
     )
   }
   return (
-    <aside className="hidden sticky top-0 z-50 h-screen w-64 border-r bg-white lg:block">
+    <aside className="sticky top-0 z-50 hidden h-screen w-64 border-r bg-white lg:block">
       <div className="flex h-full flex-col gap-2 p-4">
         {items.map((item, i) => {
           const Icon = item.icon
 
           if (item.type === 'add') {
             return (
-              <button
-                key={`add-${i}`}
-                className="flex items-center gap-3 rounded-lg bg-green-600 px-4 py-3 text-white hover:bg-green-700"
-              >
-                <Icon size={18} />
-                {item.label}
-              </button>
+              <div key="add" className="-translate-y-6 p-4">
+                <AddTransactionSheet />
+              </div>
             )
           }
 

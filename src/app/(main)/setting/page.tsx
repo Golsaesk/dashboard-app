@@ -1,3 +1,9 @@
+import Setting from '@/components/setting/Setting'
+
 export default function SettingPage() {
-  return <div>SettingPage</div>
+  return (
+    <div>
+      <Setting />
+    </div>
+  )
 }

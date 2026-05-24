@@ -15,11 +15,11 @@ export function AddTransactionSheet() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button
-          size="icon"
-          className="h-14 w-14 rounded-full bg-[#0AA165] shadow-lg transition hover:scale-105 hover:opacity-90"
-        >
+        <Button className="flex h-14 w-14 items-center justify-center gap-2 rounded-lg bg-[#0AA165] p-0 shadow-lg transition hover:opacity-90 lg:w-auto lg:px-5">
           <Plus className="size-6 text-white" />
+          <span className="hidden text-sm font-medium text-white lg:inline">
+            Add Transaction
+          </span>
         </Button>
       </DrawerTrigger>
       <DrawerContent className="mx-auto w-full max-w-md rounded-t-3xl">
