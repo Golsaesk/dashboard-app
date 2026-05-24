@@ -1,33 +1,29 @@
 'use client'
 
-import Footer from '@/components/footer/Footer'
+import { useMemo, useState } from 'react'
 import Navbar from '@/components/navbar/Navbar'
+import Footer from '@/components/footer/Footer'
 import { footerItems } from '@/data/footer/footer.config'
-import { ProtectedRoute } from '@/components/protectedRoute/ProtectedRoute'
 import MenuContent from '@/components/navbar/MenuContent'
-import { menuItems } from '@/data/menu/menu.config'
+import { desktopMenuItems } from '@/data/menu/menu.config'
 
 export default function MainLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <div className="flex min-h-screen w-full bg-zinc-50">
-      {/* 🧠 SIDEBAR (desktop only) */}
-      <aside className="hidden lg:block lg:w-64">
-        <MenuContent items={menuItems} isOpen={true} onClose={() => {}} />
-      </aside>
+  const [addOpen, setAddOpen] = useState(false),
+    menu = useMemo(() => desktopMenuItems(() => setAddOpen(true)), [])
 
-      {/* 🧠 MAIN CONTENT */}
+  return (
+    <div className="flex min-h-screen bg-zinc-50">
+      <MenuContent items={menu} mode="desktop" />
       <div className="flex flex-1 flex-col">
         <Navbar />
-
-        <main className="flex-1 pb-16">
-          <ProtectedRoute>{children}</ProtectedRoute>
-        </main>
-
-        <Footer items={footerItems} />
+        <main className="flex-1 p-6 pb-20 lg:pb-6">{children}</main>
+        <div className="lg:hidden">
+          <Footer items={footerItems} />
+        </div>
       </div>
     </div>
   )

@@ -1,25 +1,27 @@
-import { MenuItem } from './menu'
-import { HomeIcon, LayoutDashboard, SettingsIcon, UserIcon } from 'lucide-react'
+import {
+  UserIcon,
+  SettingsIcon,
+  LayoutDashboard,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  ChartColumn,
+  Plus,
+} from 'lucide-react'
 
-export const menuItems: MenuItem[] = [
-  {
-    lable: 'Home',
-    path: '/',
-    icon: HomeIcon,
-  },
-  {
-    lable: 'Profile',
-    path: '/profile',
-    icon: UserIcon,
-  },
-  {
-    lable: 'Settings',
-    path: '/settings',
-    icon: SettingsIcon,
-  },
-  {
-    lable: 'Dashboard',
-    path: '/dashboard',
-    icon: LayoutDashboard,
-  },
+import { MenuItem } from './menu'
+
+export const desktopMenuItems = (onAdd: () => void): MenuItem[] => [
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Income', path: '/income', icon: ArrowDownCircle },
+  { label: 'Outcome', path: '/outcome', icon: ArrowUpCircle },
+  { label: 'Report', path: '/reports', icon: ChartColumn },
+  { label: 'Profile', path: '/profile', icon: UserIcon },
+  { label: 'Settings', path: '/settings', icon: SettingsIcon },
+  { type: 'add', label: 'Add Transaction', icon: Plus },
+]
+
+export const mobileMenuItems: MenuItem[] = [
+  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Profile', path: '/profile', icon: UserIcon },
+  { label: 'Settings', path: '/settings', icon: SettingsIcon },
 ]

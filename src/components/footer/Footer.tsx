@@ -7,7 +7,6 @@ import { AddTransactionSheet } from '../transaction/AddTransactionSheet'
 type props = {
   items: FooterItem[]
 }
-
 export default function Footer({ items }: props) {
   const router = useRouter()
 
@@ -23,7 +22,6 @@ export default function Footer({ items }: props) {
             </div>
           )
         }
-
         return (
           <button
             key={item.path}
