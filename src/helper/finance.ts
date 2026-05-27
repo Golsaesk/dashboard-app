@@ -1,25 +1,25 @@
 import { Transaction } from '@/type/transaction'
 
-export function getTotalIncome(transactions: Transaction[]) {
+export function getTotalIncome(transactions: Transaction[] = []) {
   return transactions
     .filter((t) => t.type === 'income')
     .reduce((acc, t) => acc + t.amount, 0)
 }
 
-export function getTotalOutcome(transactions: Transaction[]) {
+export function getTotalOutcome(transactions: Transaction[] = []) {
   return transactions
     .filter((t) => t.type === 'outcome')
     .reduce((acc, t) => acc + t.amount, 0)
 }
 
-export function getBalance(transactions: Transaction[]) {
+export function getBalance(transactions: Transaction[] = []) {
   return getTotalIncome(transactions) - getTotalOutcome(transactions)
 }
 
-export function getTopSource(transactions: Transaction[]) {
+export function getTopSource(transactions: Transaction[] = []) {
   const incomeTransactions = transactions.filter((t) => t.type === 'income')
 
-  if (!incomeTransactions.length) {
+  if (incomeTransactions.length === 0) {
     return 'No Source'
   }
 
@@ -32,18 +32,20 @@ export function getTopSource(transactions: Transaction[]) {
   return Object.entries(grouped).sort((a, b) => b[1] - a[1])[0][0]
 }
 
-export function getMonthlyAverage(transactions: Transaction[]) {
-  if (!transactions.length) return 0
+export function getMonthlyAverage(transactions: Transaction[] = []) {
+  if (transactions.length === 0) {
+    return 0
+  }
 
   const total = transactions.reduce((acc, t) => acc + t.amount, 0)
 
   return total / transactions.length
 }
 
-export function getMostSpend(transactions: Transaction[]) {
+export function getMostSpend(transactions: Transaction[] = []) {
   const outcomeTransactions = transactions.filter((t) => t.type === 'outcome')
 
-  if (!outcomeTransactions.length) {
+  if (outcomeTransactions.length === 0) {
     return 'No Spending'
   }
 
@@ -56,6 +58,6 @@ export function getMostSpend(transactions: Transaction[]) {
   return Object.entries(grouped).sort((a, b) => b[1] - a[1])[0][0]
 }
 
-export function getNetSaving(transactions: Transaction[]) {
+export function getNetSaving(transactions: Transaction[] = []) {
   return getTotalIncome(transactions) - getTotalOutcome(transactions)
 }

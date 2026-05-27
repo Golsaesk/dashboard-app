@@ -1,58 +1,39 @@
 'use client'
 
-import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
-import { useAppMode } from '@/store/appmodeStore'
 
 export function useAuthInit() {
   const setAuth = useAuthStore((s) => s.setAuth)
-  const setMode = useAppMode((s) => s.setMode)
 
-  useEffect(() => {
-    let mounted = true
-
-    async function init() {
-      // 1. get session (single source of truth)
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-
-      if (!mounted) return
-
-      const user = session?.user ?? null
-
-      // 2. set auth state
-      setAuth({
-        user,
-        session,
-        loading: false,
-      })
-
-      // 3. set mode
-      setMode(user ? 'auth' : 'demo')
-    }
-
-    init()
-
-    // 4. listen for changes (IMPORTANT)
+  async function init() {
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user ?? null
+      data: { user },
+    } = await supabase.auth.getUser()
 
-      setAuth({
-        user,
-        session,
-        loading: false,
-      })
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-      setMode(user ? 'auth' : 'demo')
-    })
+    let plan: 'free' | 'pro' = 'free'
 
-    return () => {
-      mounted = false
-      subscription.unsubscribe()
+    if (user) {
+      const { data } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single()
+
+      plan = data?.plan ?? 'free'
     }
-  }, [setAuth, setMode])
+
+    setAuth({
+      user,
+      session,
+      plan,
+      loading: false,
+    })
+  }
+
+  return { init }
 }

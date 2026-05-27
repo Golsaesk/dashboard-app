@@ -1,22 +1,22 @@
 import { create } from 'zustand'
-import { User, Session } from '@supabase/supabase-js'
+import { Session, User } from '@supabase/supabase-js'
+
+type Plan = 'free' | 'pro'
 
 interface AuthState {
   user: User | null
   session: Session | null
+  plan: Plan
   loading: boolean
 
-  setAuth: (payload: {
-    user: User | null
-    session: Session | null
-    loading: boolean
-  }) => void
+  setAuth: (data: Partial<AuthState>) => void
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
+  plan: 'free',
   loading: true,
 
-  setAuth: ({ user, session, loading }) => set({ user, session, loading }),
+  setAuth: (data) => set((state) => ({ ...state, ...data })),
 }))

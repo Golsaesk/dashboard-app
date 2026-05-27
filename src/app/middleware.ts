@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function middleware(req: NextRequest) {
-  let response = NextResponse.next()
+  const res = NextResponse.next()
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,35 +15,29 @@ export async function middleware(req: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
+            res.cookies.set(name, value, options)
           })
         },
       },
-    }
+    },
   )
 
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = req.nextUrl.pathname
+  const path = req.nextUrl.pathname
 
-  const isDashboard = pathname.startsWith('/dashboard')
-  const isAuthPage = pathname.startsWith('/auth')
-
-  if (!user && isDashboard) {
-    return NextResponse.redirect(
-      new URL('/auth', req.url)
-    )
+  // auth protection
+  if (!user && path.startsWith('/dashboard')) {
+    return NextResponse.redirect(new URL('/auth', req.url))
   }
 
-  if (user && isAuthPage) {
-    return NextResponse.redirect(
-      new URL('/dashboard', req.url)
-    )
+  if (user && path.startsWith('/auth')) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
-  return response
+  return res
 }
 
 export const config = {

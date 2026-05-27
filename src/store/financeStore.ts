@@ -1,69 +1,258 @@
 import { create } from 'zustand'
+import { Goal } from '@/type/goal'
 import { Transaction } from '@/type/transaction'
-
+import { FixedCost } from '@/type/fixedCost'
+import { supabase } from '@/lib/supabase/client'
 type FinanceStore = {
   transactions: Transaction[]
+  goals: Goal[]
+  fixedCosts: FixedCost[]
 
-  addTransaction: (transaction: Transaction) => void
+  loading: boolean
 
-  removeTransaction: (id: string) => void
+  // =========================
+  // TRANSACTIONS
+  // =========================
 
-  updateTransaction: (updatedTransaction: Transaction) => void
+  fetchTransactions: () => Promise<void>
+
+  addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>
+
+  removeTransaction: (id: string) => Promise<void>
+
+  updateTransaction: (transaction: Transaction) => Promise<void>
+
+  // =========================
+  // GOALS
+  // =========================
+
+  addGoal: (goal: Goal) => void
+  removeGoal: (id: string) => void
+  updateGoal: (goal: Goal) => void
+
+  // =========================
+  // FIXED COSTS
+  // =========================
+
+  fetchFixedCosts: () => Promise<void>
+
+  addFixedCost: (cost: Omit<FixedCost, 'id'>) => Promise<void>
+
+  removeFixedCost: (id: string) => Promise<void>
+
+  updateFixedCost: (cost: FixedCost) => Promise<void>
+
+  totalMonthlyFixedCosts: () => number
 }
 
-export const useFinanceStore = create<FinanceStore>((set) => ({
-  transactions: [
-    {
-      id: '1',
-      name: 'Salary',
-      amount: 5000,
-      date: '2026-01-01',
-      type: 'income',
-    },
+export const useFinanceStore = create<FinanceStore>((set, get) => ({
+  transactions: [],
 
-    {
-      id: '2',
-      name: 'Freelance Project',
-      amount: 1800,
-      date: '2026-01-05',
-      type: 'income',
-    },
+  goals: [],
 
-    {
-      id: '3',
-      name: 'Groceries',
-      amount: 250,
-      date: '2026-01-08',
-      type: 'outcome',
-    },
+  fixedCosts: [],
 
-    {
-      id: '4',
-      name: 'Netflix Subscription',
-      amount: 20,
-      date: '2026-01-10',
-      type: 'outcome',
-    },
-  ],
+  loading: false,
 
-  addTransaction: (transaction) =>
+  // ======================================
+  // TRANSACTIONS
+  // ======================================
+
+  fetchTransactions: async () => {
+    set({ loading: true })
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      set({ loading: false })
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('date', {
+        ascending: false,
+      })
+
+    if (error) {
+      console.error(error)
+    }
+
+    set({
+      transactions: data || [],
+      loading: false,
+    })
+  },
+
+  addTransaction: async (transaction) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('transactions')
+      .insert({
+        ...transaction,
+        user_id: user.id,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
     set((state) => ({
-      transactions: [transaction, ...state.transactions],
+      transactions: [data, ...state.transactions],
+    }))
+  },
+
+  removeTransaction: async (id) => {
+    const { error } = await supabase.from('transactions').delete().eq('id', id)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    set((state) => ({
+      transactions: state.transactions.filter((item) => item.id !== id),
+    }))
+  },
+
+  updateTransaction: async (updatedTransaction) => {
+    const { error } = await supabase
+      .from('transactions')
+      .update(updatedTransaction)
+      .eq('id', updatedTransaction.id)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    set((state) => ({
+      transactions: state.transactions.map((item) =>
+        item.id === updatedTransaction.id ? updatedTransaction : item,
+      ),
+    }))
+  },
+
+  // ======================================
+  // GOALS
+  // ======================================
+
+  addGoal: (goal) =>
+    set((state) => ({
+      goals: [goal, ...state.goals],
     })),
 
-  removeTransaction: (id) =>
+  removeGoal: (id) =>
     set((state) => ({
-      transactions: state.transactions.filter(
-        (transaction) => transaction.id !== id,
+      goals: state.goals.filter((goal) => goal.id !== id),
+    })),
+
+  updateGoal: (updatedGoal) =>
+    set((state) => ({
+      goals: state.goals.map((goal) =>
+        goal.id === updatedGoal.id ? updatedGoal : goal,
       ),
     })),
 
-  updateTransaction: (updatedTransaction) =>
+  // ======================================
+  // FIXED COSTS
+  // ======================================
+
+  fetchFixedCosts: async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('fixed_costs')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', {
+        ascending: false,
+      })
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    set({
+      fixedCosts: data || [],
+    })
+  },
+
+  addFixedCost: async (cost) => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return
+
+    const { data, error } = await supabase
+      .from('fixed_costs')
+      .insert({
+        ...cost,
+        user_id: user.id,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
     set((state) => ({
-      transactions: state.transactions.map((transaction) =>
-        transaction.id === updatedTransaction.id
-          ? updatedTransaction
-          : transaction,
+      fixedCosts: [data, ...state.fixedCosts],
+    }))
+  },
+
+  removeFixedCost: async (id) => {
+    const { error } = await supabase.from('fixed_costs').delete().eq('id', id)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    set((state) => ({
+      fixedCosts: state.fixedCosts.filter((item) => item.id !== id),
+    }))
+  },
+
+  updateFixedCost: async (updatedCost) => {
+    const { error } = await supabase
+      .from('fixed_costs')
+      .update(updatedCost)
+      .eq('id', updatedCost.id)
+
+    if (error) {
+      console.error(error)
+      return
+    }
+
+    set((state) => ({
+      fixedCosts: state.fixedCosts.map((item) =>
+        item.id === updatedCost.id ? updatedCost : item,
       ),
-    })),
+    }))
+  },
+
+  totalMonthlyFixedCosts: () => {
+    return get().fixedCosts.reduce((acc, item) => acc + Number(item.amount), 0)
+  },
 }))
