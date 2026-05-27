@@ -1,6 +1,6 @@
 'use client'
 
-import { MenuItem } from '@/data/menu/menu'
+import { MenuItem } from '@/type/menu'
 import { useRouter, usePathname } from 'next/navigation'
 import { AddTransactionSheet } from '@/components/transaction/AddTransactionSheet'
 

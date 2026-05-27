@@ -8,10 +8,10 @@ import {
   Plus,
 } from 'lucide-react'
 
-import { MenuItem } from './menu'
+import { MenuItem } from '../type/menu'
 
 export const desktopMenuItems = (onAdd: () => void): MenuItem[] => [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
   { label: 'Income', path: '/income', icon: ArrowDownCircle },
   { label: 'Outcome', path: '/outcome', icon: ArrowUpCircle },
   { label: 'Report', path: '/reports', icon: ChartColumn },

@@ -8,7 +8,7 @@ import ThemeProvider from '@/providers/themeProvider'
 import MenuContent from '@/components/navbar/MenuContent'
 
 import { footerItems } from '@/data/footer/footer.config'
-import { desktopMenuItems } from '@/data/menu/menu.config'
+import { desktopMenuItems } from '@/config/menu.config'
 
 export default function MainLayout({
   children,

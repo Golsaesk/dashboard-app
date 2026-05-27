@@ -2,6 +2,8 @@ import type { LucideIcon } from 'lucide-react'
 
 export type SettingToggleKey = 'darkMode' | 'notifications'
 
+export type SettingButtonKey = 'editProfile'
+
 export type SettingItemBase = {
   id: number
   title: string
@@ -17,6 +19,8 @@ export type ToggleSettingItem = SettingItemBase & {
 
 export type ButtonSettingItem = SettingItemBase & {
   type: 'button'
+  key: SettingButtonKey
+  onClick?: () => void
 }
 
 export type SettingItem = ToggleSettingItem | ButtonSettingItem

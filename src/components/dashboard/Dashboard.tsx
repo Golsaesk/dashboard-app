@@ -2,6 +2,7 @@
 
 import Chart from '@/components/charts/Chart'
 import { useFinanceStore } from '@/store/financeStore'
+import AiFinanceStatusCard from './AiFinanceStatusCard'
 import { FeatureGate } from '@/components/auth/FeatureGate'
 import Transaction from '@/components/transaction/Transaction'
 import { getDashboardSummary } from '@/config/dashboardSummary'
@@ -15,21 +16,28 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-white">
-              Dashboard
-            </h1>
-            <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
-              {new Date().toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
-          </div>
+        <div className="w-full">
           <FeatureGate>
-            <DailyReportButton />
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <AiFinanceStatusCard />
+            </div>
+
+            <div className="flex h-full items-start rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+              <div className="w-full space-y-3">
+                <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
+                  Daily Report
+                </h3>
+
+                <p className="text-xs text-zinc-500">
+                  Send your financial summary directly to Telegram with AI
+                  insights.
+                </p>
+
+                <DailyReportButton />
+              </div>
+            </div>
+          </div>
           </FeatureGate>
         </div>
 
