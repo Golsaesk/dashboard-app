@@ -1,8 +1,10 @@
 'use client'
 
-import Link from 'next/link'
-import { Lock } from 'lucide-react'
+import { useState } from 'react'
+import { Lock, Loader2 } from 'lucide-react'
+
 import { useAuthStore } from '@/store/authStore'
+import { supabase } from '@/lib/supabase/client'
 
 type FeatureGateProps = {
   children: React.ReactNode
@@ -13,8 +15,55 @@ export function FeatureGate({
   children,
   title = 'Pro Feature',
 }: FeatureGateProps) {
-  const plan = useAuthStore((s) => s.plan),
-    isLocked = plan !== 'pro'
+  const [loading, setLoading] = useState(false)
+
+  const plan = useAuthStore((s) => s.plan)
+
+  const isLocked = plan !== 'pro'
+
+  const handleUpgrade = async () => {
+    try {
+      setLoading(true)
+
+      // گرفتن یوزر
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      // اگر لاگین نبود
+      if (!user) {
+        window.location.href = '/login'
+        return
+      }
+
+      // ساخت checkout session
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          email: user.email,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error('Failed to create checkout session')
+      }
+
+      const data = await res.json()
+
+      // رفتن به Stripe Checkout
+      window.location.href = data.url
+    } catch (err) {
+      console.error(err)
+
+      alert('Something went wrong')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <div className="relative w-full min-w-0">
@@ -41,12 +90,20 @@ export function FeatureGate({
               Upgrade to Pro to unlock this feature
             </p>
 
-            <Link
-              href="/pricing"
-              className="rounded-xl bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:scale-[1.02] hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            <button
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:scale-[1.02] hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
             >
-              Upgrade
-            </Link>
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Redirecting...
+                </>
+              ) : (
+                'Upgrade to Pro'
+              )}
+            </button>
           </div>
         </div>
       )}

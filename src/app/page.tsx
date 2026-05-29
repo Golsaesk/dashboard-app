@@ -2,9 +2,28 @@
 
 import { useRouter } from 'next/navigation'
 import ThemeProvider from '@/providers/themeProvider'
+import { supabase } from '@/lib/supabase/client'
 
 export default function Home() {
   const router = useRouter()
+
+  const handleDemo = async () => {
+    const { data, error } = await supabase.auth.signInAnonymously()
+
+    if (error) {
+      console.log('Demo login error:', error)
+      return
+    }
+
+    // optional: ذخیره local flag
+    localStorage.setItem('mode', 'demo')
+
+    router.push('/dashboard?mode=demo')
+  }
+
+  const handleLogin = () => {
+    router.push('/signin')
+  }
 
   return (
     <ThemeProvider>
@@ -20,14 +39,14 @@ export default function Home() {
 
         <div className="mt-8 flex gap-3">
           <button
-            onClick={() => router.push('/dashboard?mode=demo')}
+            onClick={handleDemo}
             className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600"
           >
             Get a Demo
           </button>
 
           <button
-            onClick={() => router.push('/signin')}
+            onClick={handleLogin}
             className="rounded-xl border border-zinc-200 px-6 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             Sign Up / Login
