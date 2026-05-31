@@ -26,10 +26,17 @@ export function getTopSource(transactions: Transaction[] = []) {
   const grouped: Record<string, number> = {}
 
   incomeTransactions.forEach((t) => {
+    if (!t.name) return
     grouped[t.name] = (grouped[t.name] || 0) + t.amount
   })
 
-  return Object.entries(grouped).sort((a, b) => b[1] - a[1])[0][0]
+  const entries = Object.entries(grouped)
+
+  if (entries.length === 0) {
+    return 'No Source'
+  }
+
+  return entries.sort((a, b) => b[1] - a[1])[0][0]
 }
 
 export function getMonthlyAverage(transactions: Transaction[] = []) {

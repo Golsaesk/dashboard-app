@@ -1,12 +1,16 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY!,
-})
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   try {
+    const client = new OpenAI({
+      apiKey: process.env.GROQ_API_KEY!,
+      baseURL: 'https://api.groq.com/openai/v1',
+    })
+
     const { transactions, fixedCosts } = await req.json()
 
     const totalIncome = transactions
@@ -32,25 +36,23 @@ Analyze this user's financial data:
 Return ONLY valid JSON in this format:
 {
   "score": number between -100 and 100,
-  "summary": string (1 sentence),
-  "insight": string (short analysis),
-  "suggestion": string (practical advice)
+  "summary": string,
+  "insight": string,
+  "suggestion": string
 }
 
 Rules:
 - Output ONLY JSON
 - No markdown
 - No extra text
-- Keep it concise and useful
 `
 
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+    const completion = await client.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       messages: [
         {
           role: 'system',
-          content:
-            'You are a strict JSON generator. You always return valid JSON only.',
+          content: 'Return ONLY valid JSON. No explanations.',
         },
         {
           role: 'user',

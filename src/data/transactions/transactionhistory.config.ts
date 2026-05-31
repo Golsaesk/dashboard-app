@@ -1,4 +1,4 @@
-import { TransactionType } from './transactionhistory'
+import { TransactionType } from './transactionHistoryType'
 
 export const transactionItems: TransactionType[] = [
   {

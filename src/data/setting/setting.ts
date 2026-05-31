@@ -19,7 +19,7 @@ export type ToggleSettingItem = SettingItemBase & {
 
 export type ButtonSettingItem = SettingItemBase & {
   type: 'button'
-  key: SettingButtonKey
+  key?: SettingButtonKey
   onClick?: () => void
 }
 

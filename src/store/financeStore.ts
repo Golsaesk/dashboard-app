@@ -3,43 +3,27 @@ import { Goal } from '@/type/goal'
 import { Transaction } from '@/type/transaction'
 import { FixedCost } from '@/type/fixedCost'
 import { supabase } from '@/lib/supabase/client'
+import { isDemoUser } from '@/lib/isDemoUser'
+import { createDemoId } from '@/lib/utils/createDemoId'
+
 type FinanceStore = {
   transactions: Transaction[]
   goals: Goal[]
   fixedCosts: FixedCost[]
-
   loading: boolean
 
-  // =========================
-  // TRANSACTIONS
-  // =========================
-
   fetchTransactions: () => Promise<void>
-
   addTransaction: (transaction: Omit<Transaction, 'id'>) => Promise<void>
-
   removeTransaction: (id: string) => Promise<void>
-
   updateTransaction: (transaction: Transaction) => Promise<void>
-
-  // =========================
-  // GOALS
-  // =========================
 
   addGoal: (goal: Goal) => void
   removeGoal: (id: string) => void
   updateGoal: (goal: Goal) => void
 
-  // =========================
-  // FIXED COSTS
-  // =========================
-
   fetchFixedCosts: () => Promise<void>
-
   addFixedCost: (cost: Omit<FixedCost, 'id'>) => Promise<void>
-
   removeFixedCost: (id: string) => Promise<void>
-
   updateFixedCost: (cost: FixedCost) => Promise<void>
 
   totalMonthlyFixedCosts: () => number
@@ -47,16 +31,9 @@ type FinanceStore = {
 
 export const useFinanceStore = create<FinanceStore>((set, get) => ({
   transactions: [],
-
   goals: [],
-
   fixedCosts: [],
-
   loading: false,
-
-  // ======================================
-  // TRANSACTIONS
-  // ======================================
 
   fetchTransactions: async () => {
     set({ loading: true })
@@ -74,9 +51,7 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       .from('transactions')
       .select('*')
       .eq('user_id', user.id)
-      .order('date', {
-        ascending: false,
-      })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error(error)
@@ -89,23 +64,41 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
   },
 
   addTransaction: async (transaction) => {
+    const demo = await isDemoUser()
+
+    if (demo) {
+      set((state) => ({
+        transactions: [
+          {
+            ...transaction,
+            id: createDemoId(),
+          } as Transaction,
+          ...state.transactions,
+        ],
+      }))
+      return
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser()
 
     if (!user) return
 
+    const payload = {
+      amount: (transaction as any).amount,
+      type: (transaction as any).type,
+      user_id: user.id,
+    }
+
     const { data, error } = await supabase
       .from('transactions')
-      .insert({
-        ...transaction,
-        user_id: user.id,
-      })
+      .insert(payload)
       .select()
       .single()
 
     if (error) {
-      console.error(error)
+      console.error('INSERT ERROR:', error)
       return
     }
 
@@ -115,6 +108,15 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
   },
 
   removeTransaction: async (id) => {
+    const demo = await isDemoUser()
+
+    if (demo) {
+      set((state) => ({
+        transactions: state.transactions.filter((t) => t.id !== id),
+      }))
+      return
+    }
+
     const { error } = await supabase.from('transactions').delete().eq('id', id)
 
     if (error) {
@@ -123,14 +125,17 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     }
 
     set((state) => ({
-      transactions: state.transactions.filter((item) => item.id !== id),
+      transactions: state.transactions.filter((t) => t.id !== id),
     }))
   },
 
   updateTransaction: async (updatedTransaction) => {
     const { error } = await supabase
       .from('transactions')
-      .update(updatedTransaction)
+      .update({
+        amount: (updatedTransaction as any).amount,
+        type: (updatedTransaction as any).type,
+      })
       .eq('id', updatedTransaction.id)
 
     if (error) {
@@ -139,36 +144,25 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     }
 
     set((state) => ({
-      transactions: state.transactions.map((item) =>
-        item.id === updatedTransaction.id ? updatedTransaction : item,
+      transactions: state.transactions.map((t) =>
+        t.id === updatedTransaction.id ? updatedTransaction : t,
       ),
     }))
   },
 
-  // ======================================
-  // GOALS
-  // ======================================
-
-  addGoal: (goal) =>
-    set((state) => ({
-      goals: [goal, ...state.goals],
-    })),
+  addGoal: (goal) => set((state) => ({ goals: [goal, ...state.goals] })),
 
   removeGoal: (id) =>
     set((state) => ({
-      goals: state.goals.filter((goal) => goal.id !== id),
+      goals: state.goals.filter((g) => g.id !== id),
     })),
 
   updateGoal: (updatedGoal) =>
     set((state) => ({
-      goals: state.goals.map((goal) =>
-        goal.id === updatedGoal.id ? updatedGoal : goal,
+      goals: state.goals.map((g) =>
+        g.id === updatedGoal.id ? updatedGoal : g,
       ),
     })),
-
-  // ======================================
-  // FIXED COSTS
-  // ======================================
 
   fetchFixedCosts: async () => {
     const {
@@ -181,18 +175,14 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
       .from('fixed_costs')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', {
-        ascending: false,
-      })
+      .order('created_at', { ascending: false })
 
     if (error) {
       console.error(error)
       return
     }
 
-    set({
-      fixedCosts: data || [],
-    })
+    set({ fixedCosts: data || [] })
   },
 
   addFixedCost: async (cost) => {
@@ -230,7 +220,7 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     }
 
     set((state) => ({
-      fixedCosts: state.fixedCosts.filter((item) => item.id !== id),
+      fixedCosts: state.fixedCosts.filter((c) => c.id !== id),
     }))
   },
 
@@ -246,13 +236,12 @@ export const useFinanceStore = create<FinanceStore>((set, get) => ({
     }
 
     set((state) => ({
-      fixedCosts: state.fixedCosts.map((item) =>
-        item.id === updatedCost.id ? updatedCost : item,
+      fixedCosts: state.fixedCosts.map((c) =>
+        c.id === updatedCost.id ? updatedCost : c,
       ),
     }))
   },
 
-  totalMonthlyFixedCosts: () => {
-    return get().fixedCosts.reduce((acc, item) => acc + Number(item.amount), 0)
-  },
+  totalMonthlyFixedCosts: () =>
+    get().fixedCosts.reduce((acc, item) => acc + Number(item.amount), 0),
 }))

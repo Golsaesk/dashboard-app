@@ -1,5 +1,6 @@
 import { Transaction } from '@/type/transaction'
 import { ArrowDown, CircleDollarSign, TrendingUp, Wallet } from 'lucide-react'
+
 import {
   getMonthlyAverage,
   getTopSource,
@@ -9,28 +10,31 @@ import {
 
 export function getIncomeSummary(transactions: Transaction[]) {
   const incomeTransactions = transactions.filter((t) => t.type === 'income')
+
+  const totalIncome = getTotalIncome(transactions)
+  const totalOutcome = getTotalOutcome(transactions)
+  const topSource = getTopSource(transactions)
+  const monthlyAverage = getMonthlyAverage(incomeTransactions)
+
   return [
     {
       name: 'Total Income',
-      total: getTotalIncome(transactions),
+      value: totalIncome,
       icon: Wallet,
     },
-
     {
       name: 'Top Source',
-      value: getTopSource(transactions),
+      value: topSource ?? 'No Source',
       icon: TrendingUp,
     },
-
     {
       name: 'Av. Month',
-      total: getMonthlyAverage(incomeTransactions),
+      value: monthlyAverage,
       icon: CircleDollarSign,
     },
-
     {
       name: 'Net After Outcome',
-      total: getTotalIncome(transactions) - getTotalOutcome(transactions),
+      value: totalIncome - totalOutcome,
       icon: ArrowDown,
     },
   ]
