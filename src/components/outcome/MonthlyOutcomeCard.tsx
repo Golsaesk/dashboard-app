@@ -1,14 +1,24 @@
 'use client'
 
 import { useFinanceStore } from '@/store/financeStore'
+import { Transaction } from '@/type/transaction'
 
 export default function MonthlyOutcomeCard() {
-  const total = useFinanceStore((state) => state.totalMonthlyFixedCosts())
+  const total = useFinanceStore((state) =>
+    (state.transactions ?? [])
+      .filter((t) => t.type === 'outcome')
+      .reduce((acc: number, item: Transaction) => {
+        return acc + Number(item.amount || 0)
+      }, 0),
+  )
 
   return (
-    <div className="rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 p-6">
-      <p className="mb-2 text-white/70">Monthly Fixed Costs</p>
-      <h1 className="text-4xl font-bold text-white">${total}</h1>
+    <div className="rounded-xl border p-4">
+      <p className="text-sm text-zinc-500">Monthly Outcome</p>
+
+      <p className="text-xl font-semibold text-red-500">
+        ${total.toLocaleString()}
+      </p>
     </div>
   )
 }

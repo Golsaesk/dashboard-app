@@ -9,13 +9,29 @@ type Props = {
   items: Transaction[]
 }
 
-const categoryInitials = (name: string) =>
-  name?.slice(0, 2).toUpperCase() || '$$'
+// ✅ safe initials helper (re-added)
+const categoryInitials = (value?: string) =>
+  value?.slice(0, 2).toUpperCase() || '$$'
+
+// ✅ safe date formatter
+const formatDate = (date: unknown) => {
+  if (!date) return '—'
+
+  const d = new Date(date as string | number | Date)
+
+  if (isNaN(d.getTime())) return '—'
+
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
 export default function TransactionHistory({ items }: Props) {
   const removeTransaction = useFinanceStore((state) => state.removeTransaction)
 
-  if (items.length === 0) {
+  if (!items.length) {
     return (
       <p className="py-6 text-center text-sm text-zinc-400 dark:text-zinc-500">
         No transactions yet
@@ -28,6 +44,8 @@ export default function TransactionHistory({ items }: Props) {
       <AnimatePresence>
         {items.map((item) => {
           const isIncome = item.type === 'income'
+          const category = item.category 
+
           return (
             <motion.div
               key={item.id}
@@ -51,19 +69,16 @@ export default function TransactionHistory({ items }: Props) {
                       : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400'
                   }`}
                 >
-                  {categoryInitials(item.name)}
+                  {categoryInitials(category)}
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                    {item.name}
+                    {category}
                   </p>
+
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                    {item.date
-                      ? new Date(item.date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })
-                      : '—'}
+                    {formatDate(item.date)}
                   </p>
                 </div>
               </div>
@@ -83,6 +98,7 @@ export default function TransactionHistory({ items }: Props) {
                     maximumFractionDigits: 0,
                   }).format(item.amount)}
                 </p>
+
                 <button
                   onClick={() => removeTransaction(item.id)}
                   className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 dark:border-red-900 dark:text-red-500 dark:hover:bg-red-950/30"

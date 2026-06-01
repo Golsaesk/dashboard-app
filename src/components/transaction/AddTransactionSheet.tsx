@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Plus, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { TransactionForm } from './TransactionForm'
+import TransactionForm from './TransactionForm'
 
 export function AddTransactionSheet() {
   const [open, setOpen] = useState(false)
@@ -59,17 +59,7 @@ export function AddTransactionSheet() {
               {/* Form */}
               <div className="max-h-[70vh] overflow-y-auto px-5 py-4">
                 {/* Date Field */}
-                <div className="mb-4">
-                  <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
-                  />
-                </div>
+            
 
                 <TransactionForm onSuccess={() => setOpen(false)} />
               </div>

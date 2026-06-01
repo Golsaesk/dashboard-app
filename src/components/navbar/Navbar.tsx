@@ -1,11 +1,11 @@
 'use client'
 
 import MenuContent from './MenuContent'
-import NotificationPopup from './NotificationPopup'
-import { Bell, BellRing, Menu } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
+import NotificationPopup from './NotificationPopup'
+import { Bell, BellRing, Menu } from 'lucide-react'
 import { mobileMenuItems } from '@/config/menu.config'
 import { useNotifications } from '@/hooks/useNotifications'
 
@@ -19,20 +19,18 @@ const titles: Record<string, string> = {
 }
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false)
-  const [userName, setUserName] = useState('')
-
-  const pathname = usePathname()
-  const title = titles[pathname] || 'Dashboard'
-
-  const {
-    notifications,
-    unreadCount,
-    open: notifOpen,
-    setOpen: setNotifOpen,
-    markAsRead,
-    markAllAsRead, // ✅ اضافه شد
-  } = useNotifications()
+  const [open, setOpen] = useState(false),
+    [userName, setUserName] = useState(''),
+    pathname = usePathname(),
+    title = titles[pathname] || 'Dashboard',
+    {
+      notifications,
+      unreadCount,
+      open: notifOpen,
+      setOpen: setNotifOpen,
+      markAsRead,
+      markAllAsRead,
+    } = useNotifications()
 
   useEffect(() => {
     const loadUser = async () => {
@@ -64,7 +62,6 @@ export default function Navbar() {
   return (
     <>
       <header className="relative flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
-        {/* Mobile menu */}
         <button
           onClick={() => setOpen(true)}
           className="rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-100 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
@@ -72,7 +69,6 @@ export default function Navbar() {
           <Menu size={20} />
         </button>
 
-        {/* Title */}
         <div>
           <h1 className="text-lg font-semibold text-zinc-900 dark:text-white">
             {title}
@@ -82,7 +78,6 @@ export default function Navbar() {
           </p>
         </div>
 
-        {/* Bell */}
         <button
           onClick={() => setNotifOpen(true)}
           className="relative rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
@@ -94,7 +89,6 @@ export default function Navbar() {
           )}
         </button>
 
-        {/* Notification Popup */}
         <NotificationPopup
           open={notifOpen}
           notifications={notifications}
@@ -104,7 +98,6 @@ export default function Navbar() {
         />
       </header>
 
-      {/* Mobile menu */}
       <MenuContent
         items={mobileMenuItems}
         mode="mobile"

@@ -21,15 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { transactionSchema, TransactionSchemaType } from '@/schema/transaction.schema'
+import {
+  transactionSchema,
+  TransactionSchemaType,
+} from '@/schema/transaction.schema'
 
 type Props = {
   onSuccess?: () => void
 }
 
-export function TransactionForm({ onSuccess }: Props) {
+export default function TransactionForm({ onSuccess }: Props) {
   const addTransaction = useFinanceStore((state) => state.addTransaction)
-
   const form = useForm<TransactionSchemaType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -42,39 +44,48 @@ export function TransactionForm({ onSuccess }: Props) {
       attachment: undefined,
     },
   })
-
   const type = form.watch('type')
   const categories = type === 'income' ? INCOME_CATEGORIES : OUTCOME_CATEGORIES
 
   function onSubmit(values: TransactionSchemaType) {
     addTransaction({
-      name: values.category,
+      category: values.category,
       amount: Number(values.amount),
       date: new Date(values.date).toISOString(),
       type: values.type,
     })
+
     form.reset({
-      amount: 0, category: '', source: '', note: '',
-      type: 'income', date: new Date(), attachment: undefined,
+      amount: 0,
+      category: '',
+      source: '',
+      note: '',
+      type: 'income',
+      date: new Date(),
+      attachment: undefined,
     })
+
     onSuccess?.()
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-
-        {/* TYPE */}
         <FormField
           control={form.control}
           name="type"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-700 dark:text-zinc-300">Type</FormLabel>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Type
+              </FormLabel>
               <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
                 <button
                   type="button"
-                  onClick={() => { field.onChange('income'); form.setValue('category', '') }}
+                  onClick={() => {
+                    field.onChange('outcome')
+                    form.setValue('category', '')
+                  }}
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
                     field.value === 'income'
                       ? 'bg-white text-emerald-600 shadow-sm dark:bg-zinc-700 dark:text-emerald-400'
@@ -85,7 +96,10 @@ export function TransactionForm({ onSuccess }: Props) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => { field.onChange('outcome'); form.setValue('category', '') }}
+                  onClick={() => {
+                    field.onChange('outcome')
+                    form.setValue('category', '')
+                  }}
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
                     field.value === 'outcome'
                       ? 'bg-white text-red-500 shadow-sm dark:bg-zinc-700 dark:text-red-400'
@@ -99,16 +113,44 @@ export function TransactionForm({ onSuccess }: Props) {
           )}
         />
 
-        {/* AMOUNT */}
+        <FormField
+          control={form.control}
+          name="date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Date
+              </FormLabel>
+              <FormControl>
+                <input
+                  type="date"
+                  value={
+                    field.value
+                      ? new Date(field.value).toISOString().split('T')[0]
+                      : ''
+                  }
+                  onChange={(e) => field.onChange(new Date(e.target.value))}
+                  className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <FormField
           control={form.control}
           name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-700 dark:text-zinc-300">Amount</FormLabel>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Amount
+              </FormLabel>
               <FormControl>
                 <div className="relative">
-                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-zinc-400">$</span>
+                  <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-zinc-400">
+                    $
+                  </span>
                   <Input
                     type="number"
                     className="rounded-xl pl-7 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
@@ -121,13 +163,14 @@ export function TransactionForm({ onSuccess }: Props) {
           )}
         />
 
-        {/* CATEGORY */}
         <FormField
           control={form.control}
           name="category"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-700 dark:text-zinc-300">Category</FormLabel>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Category
+              </FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
@@ -136,7 +179,11 @@ export function TransactionForm({ onSuccess }: Props) {
                 </FormControl>
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
                   {categories.map((item) => (
-                    <SelectItem key={item.value} value={item.value} className="dark:text-white dark:focus:bg-zinc-700">
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                      className="dark:text-white dark:focus:bg-zinc-700"
+                    >
                       {item.label}
                     </SelectItem>
                   ))}
@@ -147,13 +194,14 @@ export function TransactionForm({ onSuccess }: Props) {
           )}
         />
 
-        {/* SOURCE */}
         <FormField
           control={form.control}
           name="source"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-700 dark:text-zinc-300">Source</FormLabel>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Source
+              </FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
@@ -161,25 +209,26 @@ export function TransactionForm({ onSuccess }: Props) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
-                  <SelectItem value="cash" className="dark:text-white dark:focus:bg-zinc-700">Cash</SelectItem>
-                  <SelectItem value="bank" className="dark:text-white dark:focus:bg-zinc-700">Bank</SelectItem>
-                  <SelectItem value="wallet" className="dark:text-white dark:focus:bg-zinc-700">Wallet</SelectItem>
+                  <SelectItem value="cash">Cash</SelectItem>
+                  <SelectItem value="bank">Bank</SelectItem>
+                  <SelectItem value="wallet">Wallet</SelectItem>
                 </SelectContent>
               </Select>
             </FormItem>
           )}
         />
 
-        {/* NOTE */}
         <FormField
           control={form.control}
           name="note"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="text-zinc-700 dark:text-zinc-300">Note</FormLabel>
+              <FormLabel className="text-zinc-700 dark:text-zinc-300">
+                Note
+              </FormLabel>
               <FormControl>
                 <Textarea
-                  className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:placeholder-zinc-500"
+                  className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                   {...field}
                 />
               </FormControl>
