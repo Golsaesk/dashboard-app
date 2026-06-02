@@ -26,8 +26,8 @@ export function getTopSource(transactions: Transaction[] = []) {
   const grouped: Record<string, number> = {}
 
   incomeTransactions.forEach((t) => {
-    if (!t.name) return
-    grouped[t.name] = (grouped[t.name] || 0) + t.amount
+    if (!t.category) return
+    grouped[t.category] = (grouped[t.category] || 0) + t.amount
   })
 
   const entries = Object.entries(grouped)
@@ -59,7 +59,7 @@ export function getMostSpend(transactions: Transaction[] = []) {
   const grouped: Record<string, number> = {}
 
   outcomeTransactions.forEach((t) => {
-    grouped[t.name] = (grouped[t.name] || 0) + t.amount
+    grouped[t.category] = (grouped[t.category] || 0) + t.amount
   })
 
   return Object.entries(grouped).sort((a, b) => b[1] - a[1])[0][0]

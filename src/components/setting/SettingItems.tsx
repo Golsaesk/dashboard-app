@@ -4,9 +4,7 @@ import { SettingItem } from '@/data/setting/setting'
 
 type Props = {
   item: SettingItem
-
   onToggle: (key: 'darkMode' | 'notifications') => void
-
   onSelect: (key: string, value: string) => void
 }
 
@@ -52,12 +50,10 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
         </div>
       </div>
 
-      {/* TOGGLE */}
-
       {item.type === 'toggle' && (
         <button
           onClick={() => onToggle(item.key as 'darkMode' | 'notifications')}
-          className={`relative h-7 w-12 rounded-full transition-colors ${
+          className={`relative h-7 w-12  rounded-full transition-colors ${
             item.value ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
           }`}
         >
@@ -68,8 +64,6 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
           />
         </button>
       )}
-
-      {/* SELECT */}
 
       {item.type === 'select' && (
         <select
@@ -84,9 +78,6 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
           ))}
         </select>
       )}
-
-      {/* BUTTON */}
-
       {item.type === 'button' && (
         <button
           onClick={item.onClick}
@@ -102,3 +93,4 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
     </div>
   )
 }
+

@@ -2,15 +2,14 @@
 
 import { useEffect } from 'react'
 import { useTheme } from 'next-themes'
-import { useSettingsStore } from '@/store/settingStore'
 
 export default function ThemeSync() {
-  const darkMode = useSettingsStore((s) => s.darkMode)
-  const { setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   useEffect(() => {
-    setTheme(darkMode ? 'dark' : 'light')
-  }, [darkMode, setTheme])
+    if (!resolvedTheme) return
+    setTheme(resolvedTheme)
+  }, [resolvedTheme, setTheme])
 
   return null
 }

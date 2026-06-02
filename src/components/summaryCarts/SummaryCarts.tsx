@@ -45,7 +45,10 @@ export default function SummaryCards({ items }: Props) {
               ) : (
                 <ArrowDown className="h-3 w-3" />
               )}
-              <span>{formatCurrency(Math.abs(compared))}</span>
+              <span>
+      {formatCurrency(Math.abs(compared))}
+                
+              </span>
               <span className="font-normal text-zinc-400 dark:text-zinc-500">
                 vs last month
               </span>

@@ -28,17 +28,11 @@ export type SettingItem = {
   title: string
   description: string
   icon: LucideIcon
-
   type: 'toggle' | 'button' | 'select'
-
   key: string
-
   value?: boolean | string
-
   options?: string[]
-
   variant?: 'danger'
-
   onClick?: () => void
 }
 
