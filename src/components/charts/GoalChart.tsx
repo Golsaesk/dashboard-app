@@ -1,5 +1,6 @@
 'use client'
 
+import { formatCurrency } from '@/lib/utils/currency'
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts'
 
 type Goal = {
@@ -27,7 +28,7 @@ export default function GoalChart({ goal }: { goal?: Goal }) {
   const data = [{ value: percent }, { value: 100 - percent }]
 
   return (
-    <div className="flex items-center  justify-between w-full gap-6">
+    <div className="flex w-full items-center justify-between gap-6">
       {/* Chart — سمت چپ */}
       <div className="relative h-40 w-40 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
@@ -74,11 +75,7 @@ export default function GoalChart({ goal }: { goal?: Goal }) {
         <div>
           <p className="text-xs text-zinc-400 dark:text-zinc-500">Saved</p>
           <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
-            {new Intl.NumberFormat('en-US', {
-              style: 'currency',
-              currency: 'USD',
-              maximumFractionDigits: 0,
-            }).format(goal.saved_amount)}
+            {formatCurrency(goal.saved_amount)}
           </p>
         </div>
       </div>

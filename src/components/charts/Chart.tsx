@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useFinanceStore } from '@/store/financeStore'
+import { formatChartCurrency, formatCurrency } from '@/lib/utils/currency'
 import {
   LineChart,
   Line,
@@ -10,7 +11,6 @@ import {
   Tooltip,
   CartesianGrid,
   ResponsiveContainer,
-  TooltipProps,
 } from 'recharts'
 
 type Metric = 'cost' | 'income' | 'balance'
@@ -33,19 +33,15 @@ function CustomTooltip({ active, payload, label }: any) {
     <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
       <p className="mb-1 text-xs font-medium text-zinc-400">{label}</p>
       <p className="text-sm font-semibold text-zinc-900 dark:text-white">
-        {new Intl.NumberFormat('en-US', {
-          style: 'currency',
-          currency: 'USD',
-          maximumFractionDigits: 0,
-        }).format(payload[0].value ?? 0)}
+        {formatCurrency(payload[0].value ?? 0)}
       </p>
     </div>
   )
 }
 
 export default function FinanceChart() {
-  const { transactions } = useFinanceStore()
-  const [metric, setMetric] = useState<Metric>('income')
+  const { transactions } = useFinanceStore(),
+    [metric, setMetric] = useState<Metric>('income')
 
   const data = useMemo(() => {
     const map: Record<
@@ -111,14 +107,7 @@ export default function FinanceChart() {
               className="text-zinc-400"
               axisLine={false}
               tickLine={false}
-              tickFormatter={(v) =>
-                new Intl.NumberFormat('en-US', {
-                  notation: 'compact',
-                  style: 'currency',
-                  currency: 'USD',
-                  maximumFractionDigits: 0,
-                }).format(v)
-              }
+              tickFormatter={(v) => formatChartCurrency(v)}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
 import { useFinanceStore } from '@/store/financeStore'
 import { getDashboardSummary } from '@/config/dashboardSummary'
@@ -9,7 +10,7 @@ import AddGoalForm from '@/features/goals/components/AddGoalForm'
 import ProfileOverview from '@/components/profile/ProfileOverview'
 import EditSavedModal from '@/features/goals/components/EditSavedModal'
 import { useGoalsProgress } from '@/features/goals/hooks/useGoalsProgress'
-import { Plus } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type EditingGoal = {
   id: string
@@ -19,16 +20,15 @@ type EditingGoal = {
 }
 
 export default function Profile() {
-  const { data, isLoading } = useGoalsProgress()
-  const [openAdd, setOpenAdd] = useState(false)
-  const [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null)
-  const transactions = useFinanceStore((state) => state.transactions)
-  const summaryItems = getDashboardSummary(transactions)
+  const { data, isLoading } = useGoalsProgress(),
+    [openAdd, setOpenAdd] = useState(false),
+    [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null),
+    transactions = useFinanceStore((state) => state.transactions),
+    summaryItems = getDashboardSummary(transactions)
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        {/* Profile Info */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <h2 className="mb-4 text-base font-semibold text-zinc-900 dark:text-white">
             Profile
@@ -36,7 +36,6 @@ export default function Profile() {
           <ProfileOverview />
         </div>
 
-        {/* Financial Summary */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <h2 className="mb-4 text-base font-semibold text-zinc-900 dark:text-white">
             Financial Summary
@@ -44,7 +43,6 @@ export default function Profile() {
           <SummaryCards items={summaryItems} />
         </div>
 
-        {/* Goals */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
@@ -117,21 +115,13 @@ export default function Profile() {
                   <span>
                     Saved:{' '}
                     <span className="text-zinc-600 dark:text-zinc-300">
-                      {(goal.saved ?? 0).toLocaleString('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                        maximumFractionDigits: 0,
-                      })}
+                      {formatCurrency(goal.saved ?? 0)}
                     </span>
                   </span>
                   <span>
                     Target:{' '}
                     <span className="text-zinc-600 dark:text-zinc-300">
-                      {goal.target_amount.toLocaleString('en-US', {
-                        style: 'currency',
-                        currency: 'USD',
-                        maximumFractionDigits: 0,
-                      })}
+                      {formatCurrency(goal.target_amount)}
                     </span>
                   </span>
                 </div>

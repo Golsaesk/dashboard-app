@@ -1,9 +1,6 @@
-import { supabase } from '@/lib/supabase/client'
+import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 
 export async function isDemoUser() {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  return user?.is_anonymous === true
+  const user = await getCurrentUser()
+  return user?.isDemo === true
 }

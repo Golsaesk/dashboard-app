@@ -32,6 +32,7 @@ type Props = {
 
 export default function TransactionForm({ onSuccess }: Props) {
   const addTransaction = useFinanceStore((state) => state.addTransaction)
+
   const form = useForm<TransactionSchemaType>({
     resolver: zodResolver(transactionSchema),
     defaultValues: {
@@ -44,6 +45,7 @@ export default function TransactionForm({ onSuccess }: Props) {
       attachment: undefined,
     },
   })
+
   const type = form.watch('type')
   const categories = type === 'income' ? INCOME_CATEGORIES : OUTCOME_CATEGORIES
 
@@ -79,6 +81,7 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Type
               </FormLabel>
+
               <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
                 <button
                   type="button"
@@ -94,6 +97,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                 >
                   Income
                 </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -121,6 +125,7 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Date
               </FormLabel>
+
               <FormControl>
                 <input
                   type="date"
@@ -133,6 +138,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                 />
               </FormControl>
+
               <FormMessage />
             </FormItem>
           )}
@@ -146,14 +152,16 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Amount
               </FormLabel>
+
               <FormControl>
-                <div className="relative">
+                <div className="relative w-full">
                   <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-zinc-400">
                     $
                   </span>
+
                   <Input
                     type="number"
-                    className="rounded-xl pl-7 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                    className="w-full rounded-xl pl-7 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                     value={field.value}
                     onChange={(e) => field.onChange(Number(e.target.value))}
                   />
@@ -171,12 +179,14 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Category
               </FormLabel>
+
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                  <SelectTrigger className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                 </FormControl>
+
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
                   {categories.map((item) => (
                     <SelectItem
@@ -189,6 +199,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                   ))}
                 </SelectContent>
               </Select>
+
               <FormMessage />
             </FormItem>
           )}
@@ -202,12 +213,14 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Source
               </FormLabel>
+
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
-                  <SelectTrigger className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                  <SelectTrigger className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                 </FormControl>
+
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="bank">Bank</SelectItem>
@@ -226,9 +239,10 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Note
               </FormLabel>
+
               <FormControl>
                 <Textarea
-                  className="rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                  className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
                   {...field}
                 />
               </FormControl>

@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from '@/lib/supabase/client'
 
 export async function createGoal({
   title,
@@ -19,12 +19,10 @@ export async function createGoal({
     {
       title,
       target_amount,
-      saved,
+      saved_amount: saved, 
       user_id: user.id,
     },
   ])
 
   if (error) throw error
-
-  return // ✅ مهم: هیچ data برنگردون
 }

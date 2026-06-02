@@ -1,19 +1,26 @@
 import { create } from 'zustand'
 
+export type Currency = 'USD' | 'EUR' | 'TRY'
+
 type SettingsState = {
   notifications: boolean
-  darkMode: boolean
+  currency: Currency
 
   toggleNotifications: () => void
-  toggleDarkMode: () => void
+  setCurrency: (currency: Currency) => void
 }
 
 export const useSettingsStore = create<SettingsState>((set) => ({
   notifications: true,
-  darkMode: false,
+  currency: 'USD',
 
   toggleNotifications: () =>
-    set((state) => ({ notifications: !state.notifications })),
+    set((state) => ({
+      notifications: !state.notifications,
+    })),
 
-  toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
+  setCurrency: (currency) =>
+    set({
+      currency,
+    }),
 }))

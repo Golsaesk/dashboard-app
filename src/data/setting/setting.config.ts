@@ -1,85 +1,105 @@
-import { Bell, CreditCard, Moon, ShieldCheck, Sun, User } from 'lucide-react'
+import { Bell, DollarSign, LogOut, Moon, Trash2, User } from 'lucide-react'
 
 import { SettingsSection } from './setting'
+import { Currency } from '@/store/settingStore'
 
-export const getSettingsData = (state: {
+type Props = {
   darkMode: boolean
   notifications: boolean
-}): SettingsSection[] => [
-  {
-    title: 'Preferences',
+  currency: Currency
 
+  onEditProfile: () => void
+  onLogout: () => void
+  onDeleteAccount: () => void
+}
+
+export const getSettingsData = ({
+  darkMode,
+  notifications,
+  currency,
+  onEditProfile,
+  onLogout,
+  onDeleteAccount,
+}: Props): SettingsSection[] => [
+  {
+    title: 'Profile',
     items: [
       {
         id: 1,
-        title: 'Dark Mode',
-        description: 'Switch between light and dark theme',
-
-        icon: state.darkMode ? Moon : Sun,
-
-        type: 'toggle',
-        value: state.darkMode,
-        key: 'darkMode',
+        title: 'Edit Profile',
+        description: 'Update your profile information',
+        icon: User,
+        type: 'button',
+        key: 'profile',
+        onClick: onEditProfile,
       },
     ],
   },
 
   {
-    title: 'Account & Security',
-
+    title: 'Preferences',
     items: [
       {
         id: 2,
-        title: 'Account',
-        description: 'Manage your profile',
-
-        icon: User,
-
-        type: 'button',
+        title: 'Dark Mode',
+        description: 'Switch between light and dark theme',
+        icon: Moon,
+        type: 'toggle',
+        value: darkMode,
+        key: 'darkMode',
       },
 
       {
         id: 3,
-        title: 'Security',
-        description: 'Password & 2FA',
-
-        icon: ShieldCheck,
-
-        type: 'button',
+        title: 'Currency',
+        description: 'Select preferred currency',
+        icon: DollarSign,
+        type: 'select',
+        value: currency,
+        key: 'currency',
+        options: ['USD', 'EUR', 'TRY'],
       },
     ],
   },
 
   {
     title: 'Notifications',
-
     items: [
       {
         id: 4,
         title: 'Push Notifications',
         description: 'Enable or disable alerts',
-
         icon: Bell,
-
         type: 'toggle',
-        value: state.notifications,
+        value: notifications,
         key: 'notifications',
       },
     ],
   },
 
   {
-    title: 'Financial',
-
+    title: 'Account',
     items: [
       {
         id: 5,
-        title: 'Payments',
-        description: 'Cards and billing',
-
-        icon: CreditCard,
-
+        title: 'Logout',
+        description: 'Sign out of your account',
+        icon: LogOut,
         type: 'button',
+        key: 'logout',
+        variant: 'danger',
+        onClick: onLogout,
+      },
+
+      {
+        id: 6,
+        title: 'Delete Account',
+        description: 'Permanently delete your account',
+        icon: Trash2,
+        type: 'button',
+        key: 'deleteAccount',
+        variant: 'danger',
+        onClick: onDeleteAccount,
       },
     ],
   },

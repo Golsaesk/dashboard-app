@@ -1,5 +1,6 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
 import { SummaryCartsItem } from '@/type/summaryCart'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type Props = {
   items: SummaryCartsItem[]
@@ -29,13 +30,7 @@ export default function SummaryCards({ items }: Props) {
             </div>
 
             <h3 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-white">
-              {item.value
-                ? item.value
-                : new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    maximumFractionDigits: 0,
-                  }).format(item.total || 0)}
+              {item.value ? item.value : formatCurrency(item.total || 0)}
             </h3>
 
             <div
@@ -50,13 +45,7 @@ export default function SummaryCards({ items }: Props) {
               ) : (
                 <ArrowDown className="h-3 w-3" />
               )}
-              <span>
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                  maximumFractionDigits: 0,
-                }).format(Math.abs(compared))}
-              </span>
+              <span>{formatCurrency(Math.abs(compared))}</span>
               <span className="font-normal text-zinc-400 dark:text-zinc-500">
                 vs last month
               </span>

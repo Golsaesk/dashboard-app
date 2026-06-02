@@ -21,8 +21,8 @@ export function getCategoryChartData(
   const grouped: Record<string, number> = {}
 
   transactions.forEach((transaction) => {
-    grouped[transaction.name] =
-      (grouped[transaction.name] || 0) + transaction.amount
+    const key = transaction.category || 'Other'
+    grouped[key] = (grouped[key] || 0) + transaction.amount
   })
 
   return Object.entries(grouped).map(([name, value], index) => ({

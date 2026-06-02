@@ -1,19 +1,18 @@
 'use client'
 
 import { Trash2 } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Transaction } from '@/type/transaction'
+import { formatCurrency } from '@/lib/utils/currency'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useFinanceStore } from '@/store/financeStore'
 
 type Props = {
   items: Transaction[]
 }
 
-// ✅ safe initials helper (re-added)
 const categoryInitials = (value?: string) =>
   value?.slice(0, 2).toUpperCase() || '$$'
 
-// ✅ safe date formatter
 const formatDate = (date: unknown) => {
   if (!date) return '—'
 
@@ -44,7 +43,7 @@ export default function TransactionHistory({ items }: Props) {
       <AnimatePresence>
         {items.map((item) => {
           const isIncome = item.type === 'income'
-          const category = item.category 
+          const category = item.category
 
           return (
             <motion.div
@@ -92,16 +91,12 @@ export default function TransactionHistory({ items }: Props) {
                   }`}
                 >
                   {isIncome ? '+' : '-'}
-                  {new Intl.NumberFormat('en-US', {
-                    style: 'currency',
-                    currency: 'USD',
-                    maximumFractionDigits: 0,
-                  }).format(item.amount)}
+                  {formatCurrency(item.amount)}
                 </p>
 
                 <button
                   onClick={() => removeTransaction(item.id)}
-                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 opacity-0 transition group-hover:opacity-100 hover:bg-red-50 dark:border-red-900 dark:text-red-500 dark:hover:bg-red-950/30"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-red-100 text-red-400 opacity-100 transition hover:bg-red-50 sm:opacity-0 sm:group-hover:opacity-100 dark:border-red-900 dark:text-red-500 dark:hover:bg-red-950/30"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>

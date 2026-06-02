@@ -1,10 +1,16 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client'
 import ThemeProvider from '@/providers/themeProvider'
 
 export default function Home() {
   const router = useRouter()
+
+  async function handleDemo() {
+    const { error } = await supabase.auth.signInAnonymously()
+    if (!error) router.push('/dashboard')
+  }
 
   return (
     <ThemeProvider>
@@ -20,7 +26,7 @@ export default function Home() {
 
         <div className="mt-8 flex gap-3">
           <button
-            onClick={() => router.push('/dashboard?mode=demo')}
+            onClick={handleDemo}
             className="rounded-xl bg-emerald-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600"
           >
             Get a Demo

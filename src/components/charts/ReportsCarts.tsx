@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
+import { formatCurrency } from '@/lib/utils/currency'
 import { ReportItem } from '@/data/reports/reportsCarts'
 
 type Props = {
@@ -18,10 +19,7 @@ export default function ReportsCarts({ items }: Props) {
             <p className="text-sm text-zinc-500">{item.name}</p>
 
             <h3 className="mt-3 text-lg font-bold text-zinc-900">
-              {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-              }).format(item.total)}
+              {formatCurrency(item.total)}
             </h3>
 
             <div
@@ -29,13 +27,7 @@ export default function ReportsCarts({ items }: Props) {
                 isPositive ? 'text-[#0AA165]' : 'text-red-500'
               }`}
             >
-              <span>
-                {isPositive ? '+' : ''}
-                {new Intl.NumberFormat('en-US', {
-                  style: 'currency',
-                  currency: 'USD',
-                }).format(item.compared)}
-              </span>
+              <span>{formatCurrency(item.compared)}</span>
 
               {isPositive ? <ArrowUp size={16} /> : <ArrowDown size={16} />}
             </div>
