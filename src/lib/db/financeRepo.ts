@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase/client'
-import { getCurrentUser } from '@/lib/auth/getCurrentUser'
 
 const DEMO_STORAGE_KEY = 'demo_transactions'
 const DEMO_FIXED_COSTS_KEY = 'demo_fixed_costs'
@@ -11,11 +10,9 @@ function getDemoTransactions() {
     return []
   }
 }
-
 function saveDemoTransactions(data: any[]) {
   localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(data))
 }
-
 function getDemoFixedCosts() {
   try {
     return JSON.parse(localStorage.getItem(DEMO_FIXED_COSTS_KEY) || '[]')
@@ -23,17 +20,15 @@ function getDemoFixedCosts() {
     return []
   }
 }
-
 function saveDemoFixedCosts(data: any[]) {
   localStorage.setItem(DEMO_FIXED_COSTS_KEY, JSON.stringify(data))
 }
 
-export const financeRepo = {
-  async fetchTransactions() {
-    const user = await getCurrentUser()
-    if (!user) return []
+type RepoUser = { id: string; isDemo: boolean }
 
-    if (user.isDemo) return getDemoTransactions() // ✅ از localStorage بخون
+export const financeRepo = {
+  async fetchTransactions(user: RepoUser) {
+    if (user.isDemo) return getDemoTransactions()
 
     const { data } = await supabase
       .from('transactions')
@@ -44,14 +39,10 @@ export const financeRepo = {
     return data || []
   },
 
-  async addTransaction(payload: any) {
-    const user = await getCurrentUser()
-    if (!user) return null
-
+  async addTransaction(payload: any, user: RepoUser) {
     if (user.isDemo) {
       const newItem = { ...payload, id: crypto.randomUUID() }
-      const existing = getDemoTransactions()
-      saveDemoTransactions([newItem, ...existing]) // ✅ توی localStorage ذخیره کن
+      saveDemoTransactions([newItem, ...getDemoTransactions()])
       return newItem
     }
 
@@ -65,13 +56,11 @@ export const financeRepo = {
     return data
   },
 
-  async removeTransaction(id: string) {
-    const user = await getCurrentUser()
-    if (!user) return true
-
+  async removeTransaction(id: string, user: RepoUser) {
     if (user.isDemo) {
-      const updated = getDemoTransactions().filter((t: any) => t.id !== id)
-      saveDemoTransactions(updated) // ✅
+      saveDemoTransactions(
+        getDemoTransactions().filter((t: any) => t.id !== id),
+      )
       return true
     }
 
@@ -80,15 +69,13 @@ export const financeRepo = {
     return true
   },
 
-  async updateTransaction(payload: any) {
-    const user = await getCurrentUser()
-    if (!user) return payload
-
+  async updateTransaction(payload: any, user: RepoUser) {
     if (user.isDemo) {
-      const updated = getDemoTransactions().map((t: any) =>
-        t.id === payload.id ? { ...t, ...payload } : t,
+      saveDemoTransactions(
+        getDemoTransactions().map((t: any) =>
+          t.id === payload.id ? { ...t, ...payload } : t,
+        ),
       )
-      saveDemoTransactions(updated) // ✅
       return payload
     }
 
@@ -103,11 +90,8 @@ export const financeRepo = {
     return data
   },
 
-  async fetchFixedCosts() {
-    const user = await getCurrentUser()
-    if (!user) return []
-
-    if (user.isDemo) return getDemoFixedCosts() // ✅
+  async fetchFixedCosts(user: RepoUser) {
+    if (user.isDemo) return getDemoFixedCosts()
 
     const { data } = await supabase
       .from('fixed_costs')
@@ -118,14 +102,10 @@ export const financeRepo = {
     return data || []
   },
 
-  async addFixedCost(payload: any) {
-    const user = await getCurrentUser()
-    if (!user) return null
-
+  async addFixedCost(payload: any, user: RepoUser) {
     if (user.isDemo) {
       const newItem = { ...payload, id: crypto.randomUUID() }
-      const existing = getDemoFixedCosts()
-      saveDemoFixedCosts([newItem, ...existing]) // ✅
+      saveDemoFixedCosts([newItem, ...getDemoFixedCosts()])
       return newItem
     }
 
@@ -139,41 +119,14 @@ export const financeRepo = {
     return data
   },
 
-  async removeFixedCost(id: string) {
-    const user = await getCurrentUser()
-    if (!user) return true
-
+  async removeFixedCost(id: string, user: RepoUser) {
     if (user.isDemo) {
-      const updated = getDemoFixedCosts().filter((c: any) => c.id !== id)
-      saveDemoFixedCosts(updated) // ✅
+      saveDemoFixedCosts(getDemoFixedCosts().filter((c: any) => c.id !== id))
       return true
     }
 
     const { error } = await supabase.from('fixed_costs').delete().eq('id', id)
     if (error) throw error
     return true
-  },
-
-  async updateFixedCost(payload: any) {
-    const user = await getCurrentUser()
-    if (!user) return payload
-
-    if (user.isDemo) {
-      const updated = getDemoFixedCosts().map((c: any) =>
-        c.id === payload.id ? { ...c, ...payload } : c,
-      )
-      saveDemoFixedCosts(updated) // ✅
-      return payload
-    }
-
-    const { data, error } = await supabase
-      .from('fixed_costs')
-      .update(payload)
-      .eq('id', payload.id)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
   },
 }

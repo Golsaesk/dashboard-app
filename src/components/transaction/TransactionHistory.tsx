@@ -5,9 +5,22 @@ import { Transaction } from '@/type/transaction'
 import { formatCurrency } from '@/lib/utils/currency'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useFinanceStore } from '@/store/financeStore'
+import { INCOME_CATEGORIES, OUTCOME_CATEGORIES } from '@/config/category.config'
 
 type Props = {
   items: Transaction[]
+}
+
+const ALL_CATEGORIES = [...INCOME_CATEGORIES, ...OUTCOME_CATEGORIES]
+
+const getCategoryLabel = (value?: string) => {
+  if (!value) return 'Uncategorized'
+
+  const normalized = value.trim().toLowerCase()
+
+  const found = ALL_CATEGORIES.find((c) => c.value.toLowerCase() === normalized)
+
+  return found?.label || 'Uncategorized'
 }
 
 const categoryInitials = (value?: string) =>
@@ -16,8 +29,7 @@ const categoryInitials = (value?: string) =>
 const formatDate = (date: unknown) => {
   if (!date) return '—'
 
-  const d = new Date(date as string | number | Date)
-
+  const d = new Date(date as any)
   if (isNaN(d.getTime())) return '—'
 
   return d.toLocaleDateString('en-US', {
@@ -43,7 +55,11 @@ export default function TransactionHistory({ items }: Props) {
       <AnimatePresence>
         {items.map((item) => {
           const isIncome = item.type === 'income'
-          const category = item.category
+          // const categoryLabel = getCategoryLabel(item.category)
+          const date = formatDate(item.date)
+          console.log('ITEM:', item)
+          console.log('CATEGORY:', item.category)
+          console.log('DATE:', item.date)
 
           return (
             <motion.div
@@ -68,16 +84,16 @@ export default function TransactionHistory({ items }: Props) {
                       : 'bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400'
                   }`}
                 >
-                  {categoryInitials(category)}
+                  {item.category ? categoryInitials(item.category) : '$$'}
                 </div>
 
                 <div>
                   <p className="text-sm font-medium text-zinc-900 dark:text-white">
-                    {category}
+                    {item.category}
                   </p>
 
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">
-                    {formatDate(item.date)}
+                    {date}
                   </p>
                 </div>
               </div>

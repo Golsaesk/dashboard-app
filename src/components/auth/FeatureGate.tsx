@@ -1,14 +1,16 @@
 'use client'
 
-import { Lock, Sparkles } from 'lucide-react'
-import { useAuthStore } from '@/store/authStore'
 import Link from 'next/link'
+import { Lock, Loader2, Sparkles } from 'lucide-react'
+import { useAuthStore } from '@/store/authStore'
+import { useStripeCheckout } from '@/hooks/useStripeCheckout'
 
 type FeatureGateProps = {
   children: React.ReactNode
   fallback?: React.ReactNode
   title?: string
   description?: string
+  variant?: 'overlay' | 'block'
 }
 
 export function FeatureGate({
@@ -16,41 +18,78 @@ export function FeatureGate({
   fallback,
   title = 'Pro Feature',
   description = 'Upgrade to Pro to unlock this feature.',
+  variant = 'block',
 }: FeatureGateProps) {
   const plan = useAuthStore((s) => s.plan)
-
-  if (plan !== 'pro') {
-    if (fallback) return <>{fallback}</>
-
+  const { startCheckout, isLoading } = useStripeCheckout()
+  if (plan === 'pro') return <>{children}</>
+  if (fallback) return <>{fallback}</>
+  if (variant === 'overlay') {
     return (
-      <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-zinc-100 p-6 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
-        {/* glow */}
-        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl" />
+      <div className="relative w-full min-w-0">
+        <div className="pointer-events-none w-full blur-sm select-none">
+          {children}
+        </div>
 
-        <div className="relative flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white dark:bg-white dark:text-black">
-            <Lock className="h-6 w-6" />
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-white/60 backdrop-blur-sm dark:bg-zinc-900/60">
+          <div className="flex flex-col items-center gap-3 rounded-2xl border border-zinc-200 bg-white px-6 py-5 text-center shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200">
+              <Lock className="h-5 w-5" />
+            </div>
+
+            <p className="text-sm font-medium text-zinc-900 dark:text-white">
+              {title}
+            </p>
+
+            <p className="max-w-xs text-xs text-zinc-500 dark:text-zinc-400">
+              {description}
+            </p>
+
+            <button
+              onClick={startCheckout}
+              disabled={isLoading}
+              className="flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:scale-[1.02] hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  Redirecting...
+                </>
+              ) : (
+                'Upgrade to Pro'
+              )}
+            </button>
           </div>
-
-          <div className="mb-2 flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-yellow-500" />
-            <h3 className="text-lg font-semibold">{title}</h3>
-          </div>
-
-          <p className="mb-5 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
-            {description}
-          </p>
-
-          <Link
-            href="/pricing"
-            className="inline-flex items-center rounded-xl bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:scale-[1.02] hover:opacity-90 dark:bg-white dark:text-black"
-          >
-            Upgrade to Pro
-          </Link>
         </div>
       </div>
     )
   }
 
-  return <>{children}</>
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-zinc-100 p-6 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
+      <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl" />
+
+      <div className="relative flex flex-col items-center text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white dark:bg-white dark:text-black">
+          <Lock className="h-6 w-6" />
+        </div>
+
+        <div className="mb-2 flex items-center gap-2">
+          <Sparkles className="h-4 w-4 text-yellow-500" />
+          <h3 className="text-lg font-semibold">{title}</h3>
+        </div>
+
+        <p className="mb-5 max-w-sm text-sm text-zinc-500 dark:text-zinc-400">
+          {description}
+        </p>
+
+        <Link
+          href="/pricing"
+          className="inline-flex items-center rounded-xl bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:scale-[1.02] hover:opacity-90 dark:bg-white dark:text-black"
+        >
+          Upgrade to Pro
+        </Link>
+      </div>
+    </div>
+  )
 }

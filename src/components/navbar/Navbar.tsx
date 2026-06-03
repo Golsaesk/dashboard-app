@@ -1,13 +1,13 @@
 'use client'
 
 import MenuContent from './MenuContent'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePathname } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
 import NotificationPopup from './NotificationPopup'
 import { Bell, BellRing, Menu } from 'lucide-react'
 import { mobileMenuItems } from '@/config/menu.config'
 import { useNotifications } from '@/hooks/useNotifications'
+import { useAuthStore } from '@/store/authStore'
 
 const titles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -18,46 +18,33 @@ const titles: Record<string, string> = {
   '/profile': 'Profile',
 }
 
+function getUserDisplayName(
+  user: { email?: string; user_metadata?: Record<string, string> } | null,
+): string {
+  if (!user) return ''
+  return (
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email?.split('@')[0] ||
+    'User'
+  )
+}
+
 export default function Navbar() {
   const [open, setOpen] = useState(false),
-    [userName, setUserName] = useState(''),
+    user = useAuthStore((s) => s.user),
+    userName = getUserDisplayName(user),
     pathname = usePathname(),
-    title = titles[pathname] || 'Dashboard',
-    {
-      notifications,
-      unreadCount,
-      open: notifOpen,
-      setOpen: setNotifOpen,
-      markAsRead,
-      markAllAsRead,
-    } = useNotifications()
+    title = titles[pathname] || 'Dashboard'
 
-  useEffect(() => {
-    const loadUser = async () => {
-      const { data } = await supabase.auth.getSession()
-      const user = data.session?.user
-
-      if (user) {
-        setUserName(
-          user.user_metadata?.full_name ||
-            user.user_metadata?.name ||
-            user.email?.split('@')[0] ||
-            'User',
-        )
-      }
-    }
-
-    loadUser()
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
-        const user = session?.user
-        setUserName(user?.email?.split('@')[0] || 'Guest')
-      },
-    )
-
-    return () => listener.subscription.unsubscribe()
-  }, [])
+  const {
+    notifications,
+    unreadCount,
+    open: notifOpen,
+    setOpen: setNotifOpen,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications()
 
   return (
     <>
@@ -93,8 +80,8 @@ export default function Navbar() {
           open={notifOpen}
           notifications={notifications}
           onClose={() => setNotifOpen(false)}
-          onClick={markAsRead} // ✅ درست شد
-          onMarkAll={markAllAsRead} // ✅ اضافه شد
+          onClick={markAsRead}
+          onMarkAll={markAllAsRead}
         />
       </header>
 

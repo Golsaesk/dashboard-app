@@ -50,6 +50,7 @@ export default function TransactionForm({ onSuccess }: Props) {
   const categories = type === 'income' ? INCOME_CATEGORIES : OUTCOME_CATEGORIES
 
   function onSubmit(values: TransactionSchemaType) {
+    console.log('FORM VALUES:', values)
     addTransaction({
       category: values.category,
       amount: Number(values.amount),
