@@ -1,6 +1,6 @@
 'use client'
 
-import { FooterItem } from '@/data/footer/footer'
+import { FooterItem } from '@/config/footer.config'
 import { useRouter, usePathname } from 'next/navigation'
 import { AddTransactionSheet } from '@/components/transaction/AddTransactionSheet'
 
@@ -37,7 +37,7 @@ export default function Footer({ items }: Props) {
                 : 'text-zinc-500 dark:text-zinc-400'
             }`}
           >
-            <Icon size={20} />
+            <Icon />
             <span>{item.lable}</span>
           </button>
         )

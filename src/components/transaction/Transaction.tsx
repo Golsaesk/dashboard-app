@@ -4,7 +4,8 @@ import { useMemo, useState } from 'react'
 import TransactionForm from './TransactionForm'
 import { ArrowUpDown, Plus, X } from 'lucide-react'
 import TransactionHistory from './TransactionHistory'
-import { useFinanceStore } from '@/store/financeStore'
+import { TransactionListSkeleton } from '@/components/skeleton/Skeleton'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 
 type Filter = 'all' | 'income' | 'outcome'
 type Sort = 'latest' | 'earliest'
@@ -16,10 +17,10 @@ const filterLabels: Record<Filter, string> = {
 }
 
 export default function Transaction() {
-  const transactions = useFinanceStore((state) => state.transactions),
-    [open, setOpen] = useState(false),
-    [filter, setFilter] = useState<Filter>('all'),
-    [sort, setSort] = useState<Sort>('latest')
+  const { data: transactions = [], isLoading } = useTransactions()
+  const [open, setOpen] = useState(false)
+  const [filter, setFilter] = useState<Filter>('all')
+  const [sort, setSort] = useState<Sort>('latest')
 
   const processedItems = useMemo(() => {
     let data = [...transactions].filter((t) => t?.type)
@@ -67,7 +68,11 @@ export default function Transaction() {
         </div>
       </div>
 
-      <TransactionHistory items={processedItems} />
+      {isLoading ? (
+        <TransactionListSkeleton />
+      ) : (
+        <TransactionHistory items={processedItems} />
+      )}
 
       {open && (
         <div className="rounded-2xl border border-zinc-200 bg-white p-4 dark:border-zinc-700 dark:bg-zinc-900">

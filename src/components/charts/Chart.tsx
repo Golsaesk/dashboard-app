@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useFinanceStore } from '@/store/financeStore'
 import { formatChartCurrency, formatCurrency } from '@/lib/utils/currency'
 import {
   LineChart,
@@ -14,7 +13,11 @@ import {
 } from 'recharts'
 
 type Metric = 'cost' | 'income' | 'balance'
-
+type Transaction = {
+  date?: string
+  amount?: number
+  type: 'income' | 'outcome'
+}
 const tabs: { key: Metric; label: string }[] = [
   { key: 'income', label: 'Income' },
   { key: 'cost', label: 'Expenses' },
@@ -29,6 +32,7 @@ const metricColors: Record<Metric, string> = {
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
+
   return (
     <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
       <p className="mb-1 text-xs font-medium text-zinc-400">{label}</p>
@@ -39,22 +43,33 @@ function CustomTooltip({ active, payload, label }: any) {
   )
 }
 
-export default function FinanceChart() {
-  const { transactions } = useFinanceStore(),
-    [metric, setMetric] = useState<Metric>('income')
+export default function FinanceChart({
+  transactions,
+}: {
+  transactions: Transaction[]
+}) {
+  const [metric, setMetric] = useState<Metric>('income')
 
   const data = useMemo(() => {
     const map: Record<
       string,
       { month: string; cost: number; income: number; balance: number }
     > = {}
+
     for (const t of transactions) {
       if (!t?.date) continue
+
       const d = new Date(t.date)
       if (isNaN(d.getTime())) continue
+
       const month = d.toLocaleString('en-US', { month: 'short' })
-      if (!map[month]) map[month] = { month, cost: 0, income: 0, balance: 0 }
+
+      if (!map[month]) {
+        map[month] = { month, cost: 0, income: 0, balance: 0 }
+      }
+
       const amount = t.amount ?? 0
+
       if (t.type === 'income') {
         map[month].income += amount
         map[month].balance += amount
@@ -63,6 +78,7 @@ export default function FinanceChart() {
         map[month].balance -= amount
       }
     }
+
     return Object.values(map)
   }, [transactions])
 
@@ -83,45 +99,27 @@ export default function FinanceChart() {
           </button>
         ))}
       </div>
+
       <div className="h-64 w-full sm:h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={data}
-            margin={{ top: 4, right: 4, left: -20, bottom: 0 }}
-          >
+          <LineChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="currentColor"
               className="text-zinc-100 dark:text-zinc-800"
               vertical={false}
             />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-zinc-400"
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 12, fill: 'currentColor' }}
-              className="text-zinc-400"
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(v) => formatChartCurrency(v)}
-            />
+            <XAxis dataKey="month" />
+            <YAxis tickFormatter={(v) => formatChartCurrency(v)} />
             <Tooltip content={<CustomTooltip />} />
+
             <Line
               type="monotone"
               dataKey={metric}
               stroke={metricColors[metric]}
               strokeWidth={2}
-              dot={{
-                r: 4,
-                strokeWidth: 2,
-                fill: 'white',
-                stroke: metricColors[metric],
-              }}
-              activeDot={{ r: 6, strokeWidth: 0, fill: metricColors[metric] }}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
             />
           </LineChart>
         </ResponsiveContainer>

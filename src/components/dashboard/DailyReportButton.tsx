@@ -6,9 +6,9 @@ import { useFinanceStore } from '@/store/financeStore'
 
 export default function DailyReportButton() {
   const [status, setStatus] = useState<
-      'idle' | 'loading' | 'success' | 'error'
-    >('idle'),
-    { transactions, fixedCosts } = useFinanceStore()
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle')
+  const { transactions, fixedCosts } = useFinanceStore() as any
 
   async function handleSendReport() {
     setStatus('loading')
@@ -35,6 +35,7 @@ export default function DailyReportButton() {
       className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
     >
       <Send size={16} />
+
       {status === 'idle' && 'Send Daily Report'}
       {status === 'loading' && 'Sending...'}
       {status === 'success' && '✓ Sent to Telegram!'}

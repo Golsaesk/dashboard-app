@@ -2,29 +2,30 @@
 
 import { useMemo } from 'react'
 import { getCategoryChartData } from '@/helper/chart'
-import { useFinanceStore } from '@/store/financeStore'
 import { getOutcomeSummary } from '@/config/outcomeSummry'
 import AddFixedCost from '@/components/outcome/AddFixedCost'
 import CategoryChart from '@/components/charts/CategoryChart'
 import FixedCostsList from '@/components/outcome/FixedCostsList'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import MonthlyOutcomeCard from '@/components/outcome/MonthlyOutcomeCard'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import TransactionHistory from '@/components/transaction/TransactionHistory'
 
 export default function Outcome() {
-  const transactions = useFinanceStore((state) => state.transactions),
-    outcomeTransactions = useMemo(
-      () => transactions.filter((t) => t.type === 'outcome'),
-      [transactions],
-    ),
-    summaryItems = useMemo(
-      () => getOutcomeSummary(transactions),
-      [transactions],
-    ),
-    chartData = useMemo(
-      () => getCategoryChartData(outcomeTransactions),
-      [outcomeTransactions],
-    )
+  const { data: transactions = [] } = useTransactions()
+
+  const outcomeTransactions = useMemo(
+    () => transactions.filter((t) => t.type === 'outcome'),
+    [transactions],
+  )
+  const summaryItems = useMemo(
+    () => getOutcomeSummary(transactions),
+    [transactions],
+  )
+  const chartData = useMemo(
+    () => getCategoryChartData(outcomeTransactions),
+    [outcomeTransactions],
+  )
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">

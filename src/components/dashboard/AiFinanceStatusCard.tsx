@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useFinanceStore } from '@/store/financeStore'
 import {
   AlertCircle,
   TrendingUp,
@@ -8,7 +9,6 @@ import {
   Loader2,
   Brain,
 } from 'lucide-react'
-import { useFinanceStore } from '@/store/financeStore'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -20,13 +20,11 @@ interface AiFinanceResponse {
 }
 
 export default function AiFinanceStatusCard() {
-  const { transactions, fixedCosts } = useFinanceStore()
-
-  const [status, setStatus] = useState<Status>('idle')
-  const [data, setData] = useState<AiFinanceResponse | null>(null)
+  const { transactions, fixedCosts } = useFinanceStore() as any,
+    [status, setStatus] = useState<Status>('idle'),
+    [data, setData] = useState<AiFinanceResponse | null>(null)
 
   async function fetchAnalysis() {
-    // اگر هیچ داده‌ای نیست → نزن به API
     if (!transactions?.length) {
       setStatus('idle')
       return
@@ -63,9 +61,6 @@ export default function AiFinanceStatusCard() {
         ? 'text-red-500'
         : 'text-yellow-500'
 
-  // -------------------------
-  // 🧠 EMPTY STATE (DEFAULT UI)
-  // -------------------------
   if (!transactions?.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
@@ -76,7 +71,8 @@ export default function AiFinanceStatusCard() {
         </h3>
 
         <p className="text-xs text-zinc-500">
-          Add your transactions and expenses to get AI-powered financial insights
+          Add your transactions and expenses to get AI-powered financial
+          insights
         </p>
 
         <p className="text-xs text-emerald-600">
@@ -88,7 +84,6 @@ export default function AiFinanceStatusCard() {
 
   return (
     <div className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      {/* Header */}
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
           AI Financial Health
@@ -102,7 +97,6 @@ export default function AiFinanceStatusCard() {
         </button>
       </div>
 
-      {/* Loading */}
       {status === 'loading' && (
         <div className="flex items-center gap-2 text-sm text-zinc-500">
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -110,7 +104,6 @@ export default function AiFinanceStatusCard() {
         </div>
       )}
 
-      {/* Error */}
       {status === 'error' && (
         <div className="flex items-center gap-2 text-sm text-red-500">
           <AlertCircle className="h-4 w-4" />
@@ -118,10 +111,8 @@ export default function AiFinanceStatusCard() {
         </div>
       )}
 
-      {/* Success */}
       {status === 'success' && data && (
         <div className="space-y-3">
-          {/* Score */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-zinc-500">Financial Score</span>
 
@@ -137,20 +128,16 @@ export default function AiFinanceStatusCard() {
             </div>
           </div>
 
-          {/* Summary */}
           <p className="text-sm text-zinc-700 dark:text-zinc-300">
             {data.summary}
           </p>
 
-          {/* Insight */}
           <div className="rounded-xl bg-zinc-50 p-3 text-sm text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
             <span className="font-medium">Insight:</span> {data.insight}
           </div>
 
-          {/* Suggestion */}
           <div className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
-            <span className="font-medium">Suggestion:</span>{' '}
-            {data.suggestion}
+            <span className="font-medium">Suggestion:</span> {data.suggestion}
           </div>
         </div>
       )}

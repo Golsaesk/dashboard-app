@@ -1,6 +1,6 @@
 'use client'
 
-import { SettingItem } from '@/data/setting/setting'
+import { SettingItem } from '@/type/setting'
 import SettingsItem from '@/components/setting/SettingItems'
 
 type SettingsSectionType = {

@@ -1,6 +1,6 @@
 import { Bell, DollarSign, LogOut, Moon, Trash2, User } from 'lucide-react'
 
-import { SettingsSection } from './setting'
+import { SettingsSection } from '../type/setting'
 import { Currency } from '@/store/settingStore'
 
 type Props = {

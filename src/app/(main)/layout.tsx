@@ -3,11 +3,9 @@
 import { useMemo, useState } from 'react'
 import Navbar from '@/components/navbar/Navbar'
 import Footer from '@/components/footer/Footer'
-import ThemeProvider from '@/providers/themeProvider'
+import { footerItems } from '@/config/footer.config'
 import { desktopMenuItems } from '@/config/menu.config'
 import MenuContent from '@/components/navbar/MenuContent'
-import { footerItems } from '@/data/footer/footer.config'
-
 export default function MainLayout({
   children,
 }: {
@@ -17,20 +15,15 @@ export default function MainLayout({
     menu = useMemo(() => desktopMenuItems(() => setAddOpen(true)), [])
 
   return (
-    <ThemeProvider>
-      <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
-        <MenuContent items={menu} mode="desktop" />
-
-        <div className="flex flex-1 flex-col">
-          <Navbar />
-
-          <main className="flex-1 p-6 pb-20 lg:pb-6">{children}</main>
-
-          <div className="lg:hidden">
-            <Footer items={footerItems} />
-          </div>
+    <div className="flex min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <MenuContent items={menu} mode="desktop" />
+      <div className="flex flex-1 flex-col">
+        <Navbar />
+        <main className="flex-1 p-6 pb-20 lg:pb-6">{children}</main>
+        <div className="lg:hidden">
+          <Footer items={footerItems} />
         </div>
       </div>
-    </ThemeProvider>
+    </div>
   )
 }

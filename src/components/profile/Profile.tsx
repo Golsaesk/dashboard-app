@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
+import { formatCurrency } from '@/lib/utils/currency'
 import { useFinanceStore } from '@/store/financeStore'
 import { getDashboardSummary } from '@/config/dashboardSummary'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
@@ -10,7 +11,6 @@ import AddGoalForm from '@/features/goals/components/AddGoalForm'
 import ProfileOverview from '@/components/profile/ProfileOverview'
 import EditSavedModal from '@/features/goals/components/EditSavedModal'
 import { useGoalsProgress } from '@/features/goals/hooks/useGoalsProgress'
-import { formatCurrency } from '@/lib/utils/currency'
 
 type EditingGoal = {
   id: string
@@ -23,8 +23,8 @@ export default function Profile() {
   const { data, isLoading } = useGoalsProgress(),
     [openAdd, setOpenAdd] = useState(false),
     [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null),
-    transactions = useFinanceStore((state) => state.transactions),
-    summaryItems = getDashboardSummary(transactions)
+    transactions = useFinanceStore((state: any) => state.transactions),
+    summaryItems = getDashboardSummary(transactions ?? [])
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -48,6 +48,7 @@ export default function Profile() {
             <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
               Goals
             </h2>
+
             <button
               onClick={() => setOpenAdd(true)}
               className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-600"
@@ -84,10 +85,12 @@ export default function Profile() {
                   <h3 className="text-sm font-medium text-zinc-900 dark:text-white">
                     {goal.title}
                   </h3>
+
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                       {Math.round(goal.percent)}%
                     </span>
+
                     <button
                       onClick={() =>
                         setEditingGoal({
@@ -118,6 +121,7 @@ export default function Profile() {
                       {formatCurrency(goal.saved ?? 0)}
                     </span>
                   </span>
+
                   <span>
                     Target:{' '}
                     <span className="text-zinc-600 dark:text-zinc-300">

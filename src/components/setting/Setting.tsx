@@ -2,12 +2,12 @@
 
 import { useState } from 'react'
 import { useTheme } from 'next-themes'
+import SettingSection from './SettingSections'
 import { useSettingsStore } from '@/store/settingStore'
 import EditProfileModal from './modals/EditProfileModal'
 import DeleteAccountModal from './modals/DeleteAccountModal'
 import { useAccountActions } from '@/hooks/useAccountActions'
-import { getSettingsData } from '@/data/setting/setting.config'
-import SettingSection from './SettingSections'
+import { getSettingsData } from '@/config/setting.config'
 
 export default function Setting() {
   const [openProfile, setOpenProfile] = useState(false)

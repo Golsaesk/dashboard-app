@@ -1,12 +1,12 @@
 'use client'
 
-import { useFinanceStore } from '@/store/financeStore'
 import { Transaction } from '@/type/transaction'
+import { useFinanceStore } from '@/store/financeStore'
 
 export default function MonthlyOutcomeCard() {
-  const total = useFinanceStore((state) =>
+  const total = useFinanceStore((state: any) =>
     (state.transactions ?? [])
-      .filter((t) => t.type === 'outcome')
+      .filter((t: Transaction) => t.type === 'outcome')
       .reduce((acc: number, item: Transaction) => {
         return acc + Number(item.amount || 0)
       }, 0),

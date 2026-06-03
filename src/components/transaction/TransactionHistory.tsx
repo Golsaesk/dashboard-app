@@ -3,24 +3,11 @@
 import { Trash2 } from 'lucide-react'
 import { Transaction } from '@/type/transaction'
 import { formatCurrency } from '@/lib/utils/currency'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useFinanceStore } from '@/store/financeStore'
-import { INCOME_CATEGORIES, OUTCOME_CATEGORIES } from '@/config/category.config'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type Props = {
   items: Transaction[]
-}
-
-const ALL_CATEGORIES = [...INCOME_CATEGORIES, ...OUTCOME_CATEGORIES]
-
-const getCategoryLabel = (value?: string) => {
-  if (!value) return 'Uncategorized'
-
-  const normalized = value.trim().toLowerCase()
-
-  const found = ALL_CATEGORIES.find((c) => c.value.toLowerCase() === normalized)
-
-  return found?.label || 'Uncategorized'
 }
 
 const categoryInitials = (value?: string) =>
@@ -40,7 +27,9 @@ const formatDate = (date: unknown) => {
 }
 
 export default function TransactionHistory({ items }: Props) {
-  const removeTransaction = useFinanceStore((state) => state.removeTransaction)
+  const removeTransaction = useFinanceStore(
+    (state: any) => state.removeTransaction,
+  )
 
   if (!items.length) {
     return (
@@ -55,11 +44,7 @@ export default function TransactionHistory({ items }: Props) {
       <AnimatePresence>
         {items.map((item) => {
           const isIncome = item.type === 'income'
-          // const categoryLabel = getCategoryLabel(item.category)
           const date = formatDate(item.date)
-          console.log('ITEM:', item)
-          console.log('CATEGORY:', item.category)
-          console.log('DATE:', item.date)
 
           return (
             <motion.div

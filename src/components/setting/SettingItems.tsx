@@ -1,6 +1,6 @@
 'use client'
 
-import { SettingItem } from '@/data/setting/setting'
+import { SettingItem } from '@/type/setting'
 
 type Props = {
   item: SettingItem
@@ -53,7 +53,7 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
       {item.type === 'toggle' && (
         <button
           onClick={() => onToggle(item.key as 'darkMode' | 'notifications')}
-          className={`relative h-7 w-12  rounded-full transition-colors ${
+          className={`relative h-7 w-12 rounded-full transition-colors ${
             item.value ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-zinc-700'
           }`}
         >
@@ -93,4 +93,3 @@ export default function SettingsItem({ item, onToggle, onSelect }: Props) {
     </div>
   )
 }
-

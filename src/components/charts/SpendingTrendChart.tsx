@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
-import { useFinanceStore } from '@/store/financeStore'
+import { useMemo, useState } from 'react'
 import {
   AreaChart,
   Area,
@@ -13,16 +12,18 @@ import {
 
 type Range = '6M' | '1Y' | 'ALL'
 
-export default function SpendingTrendChart() {
-  const transactions = useFinanceStore((s) => s.transactions)
-  const fetchTransactions = useFinanceStore((s) => s.fetchTransactions)
-  const loading = useFinanceStore((s) => s.loading)
+type Transaction = {
+  amount?: number
+  type: 'income' | 'expense' | 'cost'
+  created_at: string
+}
 
+export default function SpendingTrendChart({
+  transactions,
+}: {
+  transactions: Transaction[]
+}) {
   const [range, setRange] = useState<Range>('6M')
-
-  useEffect(() => {
-    fetchTransactions()
-  }, [fetchTransactions])
 
   const data = useMemo(() => {
     if (!transactions?.length) return []
@@ -33,8 +34,7 @@ export default function SpendingTrendChart() {
     > = {}
 
     for (const t of transactions) {
-      // 🔥 FIX اصلی اینجاست
-      const rawDate = (t as any).created_at
+      const rawDate = t.created_at
       if (!rawDate) continue
 
       const date = new Date(rawDate)
@@ -74,37 +74,48 @@ export default function SpendingTrendChart() {
     return result
   }, [transactions, range])
 
-  if (loading) {
-    return (
-      <div className="flex h-72 items-center justify-center text-sm">
-        Loading...
-      </div>
-    )
-  }
-
   return (
-    <div className="h-72 w-full">
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data}>
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
+    <div className="space-y-3">
+      {/* Range selector (اختیاری ولی کاربردی) */}
+      <div className="flex gap-2 text-xs">
+        {(['6M', '1Y', 'ALL'] as Range[]).map((r) => (
+          <button
+            key={r}
+            onClick={() => setRange(r)}
+            className={`rounded px-2 py-1 ${
+              range === r
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-black'
+                : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300'
+            }`}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
 
-          <Area
-            dataKey="income"
-            stroke="#10b981"
-            fill="#10b981"
-            fillOpacity={0.2}
-          />
+      <div className="h-72 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={data}>
+            <XAxis dataKey="month" />
+            <YAxis />
+            <Tooltip />
 
-          <Area
-            dataKey="expense"
-            stroke="#f87171"
-            fill="#f87171"
-            fillOpacity={0.2}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+            <Area
+              dataKey="income"
+              stroke="#10b981"
+              fill="#10b981"
+              fillOpacity={0.2}
+            />
+
+            <Area
+              dataKey="expense"
+              stroke="#f87171"
+              fill="#f87171"
+              fillOpacity={0.2}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   )
 }

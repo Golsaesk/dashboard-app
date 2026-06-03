@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useFinanceStore } from '@/store/financeStore'
+import { showToast } from '@/lib/notification/notification'
+import { useAddTransaction } from '@/features/finance/hooks/useTransaction'
 import { INCOME_CATEGORIES, OUTCOME_CATEGORIES } from '@/config/category.config'
 import {
   Form,
@@ -25,13 +26,10 @@ import {
   transactionSchema,
   TransactionSchemaType,
 } from '@/schema/transaction.schema'
-
-type Props = {
-  onSuccess?: () => void
-}
+type Props = { onSuccess?: () => void }
 
 export default function TransactionForm({ onSuccess }: Props) {
-  const addTransaction = useFinanceStore((state) => state.addTransaction)
+  const { mutateAsync: addTransaction, isPending } = useAddTransaction()
 
   const form = useForm<TransactionSchemaType>({
     resolver: zodResolver(transactionSchema),
@@ -49,26 +47,31 @@ export default function TransactionForm({ onSuccess }: Props) {
   const type = form.watch('type')
   const categories = type === 'income' ? INCOME_CATEGORIES : OUTCOME_CATEGORIES
 
-  function onSubmit(values: TransactionSchemaType) {
-    console.log('FORM VALUES:', values)
-    addTransaction({
-      category: values.category,
-      amount: Number(values.amount),
-      date: new Date(values.date).toISOString(),
-      type: values.type,
-    })
-
-    form.reset({
-      amount: 0,
-      category: '',
-      source: '',
-      note: '',
-      type: 'income',
-      date: new Date(),
-      attachment: undefined,
-    })
-
-    onSuccess?.()
+  async function onSubmit(values: TransactionSchemaType) {
+    try {
+      await addTransaction({
+        category: values.category,
+        amount: Number(values.amount),
+        date: new Date(values.date).toISOString(),
+        type: values.type,
+      })
+      showToast({ title: 'Transaction added' }, 'success')
+      form.reset({
+        amount: 0,
+        category: '',
+        source: '',
+        note: '',
+        type: 'income',
+        date: new Date(),
+      })
+      onSuccess?.()
+    } catch (err) {
+      // FIX: error now shown to user — not just console.error
+      showToast(
+        { title: 'Failed to add transaction', message: (err as Error).message },
+        'error',
+      )
+    }
   }
 
   return (
@@ -82,12 +85,12 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Type
               </FormLabel>
-
               <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
+                {/* FIX: Income correctly sets 'income' */}
                 <button
                   type="button"
                   onClick={() => {
-                    field.onChange('outcome')
+                    field.onChange('income')
                     form.setValue('category', '')
                   }}
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
@@ -98,7 +101,6 @@ export default function TransactionForm({ onSuccess }: Props) {
                 >
                   Income
                 </button>
-
                 <button
                   type="button"
                   onClick={() => {
@@ -126,7 +128,6 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Date
               </FormLabel>
-
               <FormControl>
                 <input
                   type="date"
@@ -139,7 +140,6 @@ export default function TransactionForm({ onSuccess }: Props) {
                   className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white"
                 />
               </FormControl>
-
               <FormMessage />
             </FormItem>
           )}
@@ -153,13 +153,11 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Amount
               </FormLabel>
-
               <FormControl>
                 <div className="relative w-full">
                   <span className="absolute top-1/2 left-3 -translate-y-1/2 text-sm text-zinc-400">
                     $
                   </span>
-
                   <Input
                     type="number"
                     className="w-full rounded-xl pl-7 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
@@ -180,14 +178,12 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Category
               </FormLabel>
-
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                 </FormControl>
-
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
                   {categories.map((item) => (
                     <SelectItem
@@ -200,7 +196,6 @@ export default function TransactionForm({ onSuccess }: Props) {
                   ))}
                 </SelectContent>
               </Select>
-
               <FormMessage />
             </FormItem>
           )}
@@ -214,14 +209,12 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Source
               </FormLabel>
-
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
                     <SelectValue placeholder="Select source" />
                   </SelectTrigger>
                 </FormControl>
-
                 <SelectContent className="dark:border-zinc-700 dark:bg-zinc-800">
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="bank">Bank</SelectItem>
@@ -240,7 +233,6 @@ export default function TransactionForm({ onSuccess }: Props) {
               <FormLabel className="text-zinc-700 dark:text-zinc-300">
                 Note
               </FormLabel>
-
               <FormControl>
                 <Textarea
                   className="w-full rounded-xl dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
@@ -253,9 +245,10 @@ export default function TransactionForm({ onSuccess }: Props) {
 
         <button
           type="submit"
-          className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600"
+          disabled={isPending}
+          className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-60"
         >
-          Add Transaction
+          {isPending ? 'Adding…' : 'Add Transaction'}
         </button>
       </form>
     </Form>
