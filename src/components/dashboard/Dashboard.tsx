@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import Chart from '@/components/charts/Chart'
 import AiFinanceStatusCard from './AiFinanceStatusCard'
 import { FeatureGate } from '@/components/auth/FeatureGate'
@@ -11,8 +12,17 @@ import DailyReportButton from '@/components/dashboard/DailyReportButton'
 import { useTransactions } from '@/features/finance/hooks/useTransaction'
 
 export default function Dashboard() {
-  const { data: transactions = [], isLoading } = useTransactions(),
-    summaryItems = getDashboardSummary(transactions)
+  const {
+    data: transactions = [],
+    isLoading: loading,
+    refetch: fetchTransactions,
+  } = useTransactions()
+
+  useEffect(() => {
+    fetchTransactions()
+  }, [fetchTransactions])
+
+  const summaryItems = getDashboardSummary(transactions ?? [])
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -40,7 +50,7 @@ export default function Dashboard() {
           </FeatureGate>
         </div>
 
-        {isLoading ? (
+        {loading ? (
           <CardsGridSkeleton count={4} />
         ) : (
           <SummaryCards items={summaryItems} />
@@ -58,6 +68,7 @@ export default function Dashboard() {
           <h2 className="mb-5 text-base font-semibold text-zinc-900 dark:text-white">
             Recent Transactions
           </h2>
+
           <Transaction />
         </div>
       </div>

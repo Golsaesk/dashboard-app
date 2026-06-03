@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
-import { formatCurrency } from '@/lib/utils/currency'
 import { useFinanceStore } from '@/store/financeStore'
 import { getDashboardSummary } from '@/config/dashboardSummary'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
@@ -11,6 +10,7 @@ import AddGoalForm from '@/features/goals/components/AddGoalForm'
 import ProfileOverview from '@/components/profile/ProfileOverview'
 import EditSavedModal from '@/features/goals/components/EditSavedModal'
 import { useGoalsProgress } from '@/features/goals/hooks/useGoalsProgress'
+import { formatCurrency } from '@/lib/utils/currency'
 
 type EditingGoal = {
   id: string
@@ -20,11 +20,15 @@ type EditingGoal = {
 }
 
 export default function Profile() {
-  const { data, isLoading } = useGoalsProgress(),
-    [openAdd, setOpenAdd] = useState(false),
-    [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null),
-    transactions = useFinanceStore((state: any) => state.transactions),
-    summaryItems = getDashboardSummary(transactions ?? [])
+  const { data, isLoading } = useGoalsProgress()
+
+  const [openAdd, setOpenAdd] = useState(false)
+  const [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null)
+
+  // 🔥 فقط این خط fix شده
+  const transactions = useFinanceStore((state: any) => state.transactions)
+
+  const summaryItems = getDashboardSummary(transactions ?? [])
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">

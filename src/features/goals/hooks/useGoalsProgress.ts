@@ -1,30 +1,28 @@
-import { getGoals } from '../api/goalsApi'
-import { Transaction } from '@/type/transaction'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useTransactions } from '@/features/finance/hooks/useTransaction'
-
-export const GOALS_KEY = ['goals'] as const
+import { useEffect } from 'react'
+import { useGoalStore } from './useGoalStore'
 
 export function useGoalsProgress() {
-  const { data: transactions = [] } = useTransactions()
+  const goals = useGoalStore((state) => state.goals)
+  const loading = useGoalStore((state) => state.loading)
+  const fetchGoals = useGoalStore((state) => state.fetchGoals)
 
-  return useQuery({
-    queryKey: GOALS_KEY,
-    queryFn: getGoals,
-    select: (goals) => {
-      const totalIncome = transactions
-        .filter((t: Transaction) => t.type === 'income')
-        .reduce((s: number, t: Transaction) => s + t.amount, 0)
+  useEffect(() => {
+    fetchGoals()
+  }, [fetchGoals])
 
-      return goals.map((goal) => ({
-        ...goal,
-        saved: goal.saved_amount ?? 0,
-        percent: Math.min(
-          ((goal.saved_amount ?? 0) / goal.target_amount) * 100,
-          100,
-        ),
-        totalIncome,
-      }))
-    },
-  })
+  const data = goals.map((goal) => ({
+    id: goal.id,
+    title: goal.title,
+    target_amount: goal.target,
+    saved: goal.saved,
+    percent:
+      goal.target > 0
+        ? Math.min(Math.round((goal.saved / goal.target) * 100), 100)
+        : 0,
+  }))
+
+  return {
+    data,
+    isLoading: loading,
+  }
 }
