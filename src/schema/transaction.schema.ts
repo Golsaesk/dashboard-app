@@ -13,7 +13,7 @@ export const transactionSchema = z.object({
 
   note: z.string().optional(),
 
-  type: z.enum(['income', 'outcome']),
+  type: z.enum(['income', 'expense', 'cost']),
 
   attachment: z.any().optional(),
 })

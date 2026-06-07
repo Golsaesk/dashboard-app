@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { requireAuth } from '@/lib/auth/requireAuth'
+import { NextRequest, NextResponse } from 'next/server'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/rateLimit'
 
 const client = new OpenAI({
   apiKey: process.env.GROQ_API_KEY,
@@ -7,6 +9,25 @@ const client = new OpenAI({
 })
 
 export async function POST(req: NextRequest) {
+  const auth = await requireAuth()
+  if (!auth.ok) return auth.response
+
+  const rl = await checkRateLimit(auth.user.id, {
+    endpoint: 'daily-report',
+    limit: 3,
+    windowSeconds: 60,
+  })
+
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests — please wait a moment' },
+      {
+        status: 429,
+        headers: { 'Retry-After': '60', ...rateLimitHeaders(rl) },
+      },
+    )
+  }
+
   try {
     const { transactions, fixedCosts } = await req.json()
 
@@ -53,20 +74,15 @@ ${upcomingFixedCosts.map((fc: any) => `- ${fc.title}: ${fc.amount} (day ${fc.due
 After fixed costs: ${availableAfterFixed}
 
 Format:
-1. خلاصه
-2. درآمد
-3. هزینه‌ها
-4. توصیه
+1. ‌Brief summary of today's financial status
+2. Income
+3. Expenses
+4. Recommendation 
 `
 
     const response = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
-      messages: [
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
+      messages: [{ role: 'user', content: prompt }],
     })
 
     const reportText = response.choices[0]?.message?.content || ''
@@ -88,10 +104,10 @@ Format:
       throw new Error(JSON.stringify(err))
     }
 
-    return NextResponse.json({
-      success: true,
-      report: reportText,
-    })
+    return NextResponse.json(
+      { success: true, report: reportText },
+      { headers: rateLimitHeaders(rl) },
+    )
   } catch (error: any) {
     console.error(error)
     return NextResponse.json({ error: error.message }, { status: 500 })

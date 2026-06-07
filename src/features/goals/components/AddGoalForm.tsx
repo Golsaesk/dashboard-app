@@ -2,41 +2,27 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { createGoal } from '../api/createGoalsApi'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-type CreateGoalInput = {
-  title: string
-  target_amount: number
-  saved: number
-}
+import { useCreateGoal } from '@/features/goals/hooks/useGoalsProgress'
 
 export default function AddGoalForm({ onClose }: { onClose: () => void }) {
-  const queryClient = useQueryClient(),
-    [title, setTitle] = useState(''),
+  const [title, setTitle] = useState(''),
     [target, setTarget] = useState(''),
     [saved, setSaved] = useState('0'),
-    isValid = title.trim().length > 0 && Number(target) > 0
-
-  const mutation = useMutation<void, Error, CreateGoalInput>({
-    mutationFn: createGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['goals-progress'] })
-      onClose()
-    },
-    onError: (err: any) => {
-      console.error('Create goal error:', err?.message)
-    },
-  })
+    isValid = title.trim().length > 0 && Number(target) > 0,
+    { mutate: createGoal, isPending, isError } = useCreateGoal()
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!isValid) return
-    mutation.mutate({
-      title: title.trim(),
-      target_amount: Number(target),
-      saved: Number(saved) || 0,
-    })
+
+    createGoal(
+      {
+        title: title.trim(),
+        target_amount: Number(target),
+        saved: Number(saved) || 0,
+      },
+      { onSuccess: onClose },
+    )
   }
 
   return (
@@ -101,13 +87,13 @@ export default function AddGoalForm({ onClose }: { onClose: () => void }) {
 
         <button
           type="submit"
-          disabled={mutation.isPending || !isValid}
+          disabled={isPending || !isValid}
           className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
         >
-          {mutation.isPending ? 'Creating...' : 'Create Goal'}
+          {isPending ? 'Creating...' : 'Create Goal'}
         </button>
 
-        {mutation.isError && (
+        {isError && (
           <p className="text-center text-sm text-red-500 dark:text-red-400">
             Something went wrong. Please try again.
           </p>

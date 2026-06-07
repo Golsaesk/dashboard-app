@@ -54,6 +54,10 @@ export default function TransactionForm({ onSuccess }: Props) {
         amount: Number(values.amount),
         date: new Date(values.date).toISOString(),
         type: values.type,
+        source: values.source,
+        note: values.note,
+        attachment: values.attachment,
+        created_at: new Date(),
       })
       showToast({ title: 'Transaction added' }, 'success')
       form.reset({
@@ -66,7 +70,6 @@ export default function TransactionForm({ onSuccess }: Props) {
       })
       onSuccess?.()
     } catch (err) {
-      // FIX: error now shown to user — not just console.error
       showToast(
         { title: 'Failed to add transaction', message: (err as Error).message },
         'error',
@@ -86,7 +89,6 @@ export default function TransactionForm({ onSuccess }: Props) {
                 Type
               </FormLabel>
               <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
-                {/* FIX: Income correctly sets 'income' */}
                 <button
                   type="button"
                   onClick={() => {
@@ -108,7 +110,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                     form.setValue('category', '')
                   }}
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
-                    field.value === 'outcome'
+                    field.value === 'expense'
                       ? 'bg-white text-red-500 shadow-sm dark:bg-zinc-700 dark:text-red-400'
                       : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400'
                   }`}

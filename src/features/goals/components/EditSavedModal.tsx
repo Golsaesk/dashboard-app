@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateGoalSaved } from '../api/updateGoalApi'
-import { deleteGoal } from '../api/deleteGoalApi'
+import { useState, useEffect } from 'react'
+import {
+  useUpdateGoalSaved,
+  useDeleteGoal,
+} from '@/features/goals/hooks/useGoalsProgress'
 
 type Props = {
   goalId: string
@@ -14,11 +15,6 @@ type Props = {
   onClose: () => void
 }
 
-type UpdateGoalInput = {
-  id: string
-  saved: number
-}
-
 export default function EditSavedModal({
   goalId,
   goalTitle,
@@ -26,7 +22,6 @@ export default function EditSavedModal({
   currentSaved,
   onClose,
 }: Props) {
-  const queryClient = useQueryClient()
   const [saved, setSaved] = useState(String(currentSaved))
 
   useEffect(() => {
@@ -39,50 +34,16 @@ export default function EditSavedModal({
       ? Math.min(Math.round((validSaved / targetAmount) * 100), 100)
       : 0
 
-  const mutation = useMutation<void, Error, UpdateGoalInput>({
-    mutationFn: updateGoalSaved,
-    onSuccess: (_, variables) => {
-      queryClient.setQueryData(['goals-progress'], (old: any) => {
-        if (!old) return old
-        return old.map((goal: any) =>
-          goal.id === variables.id
-            ? {
-                ...goal,
-                saved: variables.saved,
-                percent: Math.min(
-                  Math.round((variables.saved / goal.target_amount) * 100),
-                  100,
-                ),
-              }
-            : goal,
-        )
-      })
-      queryClient.invalidateQueries({ queryKey: ['goals-progress'] })
-      onClose()
-    },
-  })
+  const { mutate: updateSaved, isPending: updating } = useUpdateGoalSaved()
+  const { mutate: deleteGoal, isPending: deleting } = useDeleteGoal()
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteGoal,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['goals-progress'] })
-      onClose()
-    },
-  })
-
-  async function handleSubmit(e?: React.FormEvent) {
+  function handleSubmit(e?: React.FormEvent) {
     e?.preventDefault()
-    try {
-      await updateGoalSaved({ id: goalId, saved: validSaved })
-      queryClient.invalidateQueries({ queryKey: ['goals-progress'] })
-      onClose()
-    } catch (err) {
-      console.error('update error', err)
-    }
+    updateSaved({ id: goalId, saved: validSaved }, { onSuccess: onClose })
   }
 
   function handleDelete() {
-    deleteMutation.mutate(goalId)
+    deleteGoal(goalId, { onSuccess: onClose })
   }
 
   return (
@@ -140,19 +101,19 @@ export default function EditSavedModal({
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={mutation.isPending}
+            disabled={updating}
             className="w-full rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
           >
-            {mutation.isPending ? 'Saving...' : 'Save Progress'}
+            {updating ? 'Saving...' : 'Save Progress'}
           </button>
 
           <button
             type="button"
             onClick={handleDelete}
-            disabled={deleteMutation.isPending}
+            disabled={deleting}
             className="w-full rounded-xl border border-red-200 py-3 text-sm text-red-500 transition hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:hover:bg-red-950/30"
           >
-            {deleteMutation.isPending ? 'Deleting...' : 'Delete Goal'}
+            {deleting ? 'Deleting...' : 'Delete Goal'}
           </button>
         </div>
       </motion.div>

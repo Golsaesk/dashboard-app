@@ -7,7 +7,7 @@ describe('transactionSchema', () => {
     category: 'Food',
     source: 'Cash',
     date: new Date(),
-    type: 'outcome' as const,
+    type: 'expense' as const,
   }
 
   it('validates a correct transaction', () => {

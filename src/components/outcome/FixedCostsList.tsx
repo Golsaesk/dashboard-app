@@ -1,27 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useFinanceStore } from '@/store/financeStore'
+import { useState } from 'react'
 import { Trash2, CalendarDays, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
+import {
+  useFixedCosts,
+  useAddFixedCost,
+  useRemoveFixedCost,
+} from '@/features/fixedCosts/hooks/useFixedCosts'
 
 export default function FixedCostsList() {
   const [showForm, setShowForm] = useState(false),
     [form, setForm] = useState({ title: '', amount: '', due_day: '' }),
-    [submitting, setSubmitting] = useState(false),
-    fixedCosts = useFinanceStore((s) => s.fixedCosts),
-    fetchFixedCosts = useFinanceStore((s) => s.fetchFixedCosts),
-    removeFixedCost = useFinanceStore((s) => s.removeFixedCost),
-    addFixedCost = useFinanceStore((s) => s.addFixedCost),
+    { data: fixedCosts = [] } = useFixedCosts(),
+    { mutateAsync: addFixedCost, isPending: adding } = useAddFixedCost(),
+    { mutate: removeFixedCost } = useRemoveFixedCost(),
     totalMonthly = fixedCosts.reduce((sum, c) => sum + c.amount, 0)
-
-  useEffect(() => {
-    fetchFixedCosts()
-  }, [])
 
   async function handleAdd() {
     if (!form.title || !form.amount || !form.due_day) return
-    setSubmitting(true)
     await addFixedCost({
       title: form.title,
       amount: Number(form.amount),
@@ -29,7 +26,6 @@ export default function FixedCostsList() {
     })
     setForm({ title: '', amount: '', due_day: '' })
     setShowForm(false)
-    setSubmitting(false)
   }
 
   return (
@@ -88,10 +84,10 @@ export default function FixedCostsList() {
           </div>
           <button
             onClick={handleAdd}
-            disabled={submitting}
+            disabled={adding}
             className="w-full rounded-xl bg-emerald-500 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-60"
           >
-            {submitting ? 'Adding...' : 'Add Fixed Cost'}
+            {adding ? 'Adding...' : 'Add Fixed Cost'}
           </button>
         </div>
       )}

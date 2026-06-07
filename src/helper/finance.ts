@@ -8,7 +8,7 @@ export function getTotalIncome(transactions: Transaction[] = []) {
 
 export function getTotalOutcome(transactions: Transaction[] = []) {
   return transactions
-    .filter((t) => t.type === 'outcome')
+    .filter((t) => t.type === 'expense')
     .reduce((acc, t) => acc + t.amount, 0)
 }
 
@@ -50,7 +50,7 @@ export function getMonthlyAverage(transactions: Transaction[] = []) {
 }
 
 export function getMostSpend(transactions: Transaction[] = []) {
-  const outcomeTransactions = transactions.filter((t) => t.type === 'outcome')
+  const outcomeTransactions = transactions.filter((t) => t.type === 'expense')
 
   if (outcomeTransactions.length === 0) {
     return 'No Spending'

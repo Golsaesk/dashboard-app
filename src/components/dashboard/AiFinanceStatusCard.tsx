@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useFinanceStore } from '@/store/financeStore'
 import {
   AlertCircle,
   TrendingUp,
@@ -9,6 +8,8 @@ import {
   Loader2,
   Brain,
 } from 'lucide-react'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
+import { useFixedCosts } from '@/features/fixedCosts/hooks/useFixedCosts'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -20,12 +21,13 @@ interface AiFinanceResponse {
 }
 
 export default function AiFinanceStatusCard() {
-  const { transactions, fixedCosts } = useFinanceStore() as any,
+  const { data: transactions = [] } = useTransactions(),
+    { data: fixedCosts = [] } = useFixedCosts(),
     [status, setStatus] = useState<Status>('idle'),
     [data, setData] = useState<AiFinanceResponse | null>(null)
 
   async function fetchAnalysis() {
-    if (!transactions?.length) {
+    if (!transactions.length) {
       setStatus('idle')
       return
     }
@@ -42,10 +44,9 @@ export default function AiFinanceStatusCard() {
       if (!res.ok) throw new Error('Request failed')
 
       const json = await res.json()
-
       setData(json)
       setStatus('success')
-    } catch (e) {
+    } catch {
       setStatus('error')
     }
   }
@@ -61,22 +62,19 @@ export default function AiFinanceStatusCard() {
         ? 'text-red-500'
         : 'text-yellow-500'
 
-  if (!transactions?.length) {
+  if (!transactions.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
         <Brain className="h-8 w-8 text-emerald-500" />
-
         <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
           AI Financial Assistant
         </h3>
-
         <p className="text-xs text-zinc-500">
           Add your transactions and expenses to get AI-powered financial
           insights
         </p>
-
         <p className="text-xs text-emerald-600">
-          “I’ll analyze your money habits instantly.”
+          "I'll analyze your money habits instantly."
         </p>
       </div>
     )
@@ -88,7 +86,6 @@ export default function AiFinanceStatusCard() {
         <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
           AI Financial Health
         </h2>
-
         <button
           onClick={fetchAnalysis}
           className="text-xs text-emerald-600 hover:underline"
@@ -115,7 +112,6 @@ export default function AiFinanceStatusCard() {
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm text-zinc-500">Financial Score</span>
-
             <div
               className={`flex items-center gap-1 text-lg font-bold ${scoreColor}`}
             >

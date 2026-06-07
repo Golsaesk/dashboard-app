@@ -6,7 +6,7 @@ import {
   getTotalOutcome,
 } from '@/helper/finance'
 export function getOutcomeSummary(transactions: Transaction[]) {
-  const outcomeTransactions = transactions.filter((t) => t.type === 'outcome')
+  const outcomeTransactions = transactions.filter((t) => t.type === 'expense')
   return [
     {
       name: 'Total Outcome',

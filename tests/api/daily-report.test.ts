@@ -16,6 +16,20 @@ vi.mock('openai', () => {
   return { default: OpenAI }
 })
 
+vi.mock('@/lib/auth/requireAuth', () => ({
+  requireAuth: vi.fn().mockResolvedValue({
+    ok: true,
+    user: { id: 'test-user-id', is_anonymous: false },
+  }),
+}))
+
+vi.mock('@/lib/rateLimit', () => ({
+  checkRateLimit: vi
+    .fn()
+    .mockResolvedValue({ allowed: true, remaining: 2, reset: 0 }),
+  rateLimitHeaders: vi.fn().mockReturnValue({}),
+}))
+
 const mockFetch = vi.fn()
 vi.stubGlobal('fetch', mockFetch)
 
@@ -120,5 +134,40 @@ describe('POST /api/daily-report', () => {
     if (pastDay < today) {
       expect(capturedPrompt).not.toContain('PastCost')
     }
+  })
+
+  it('should return 401 when user is not authenticated', async () => {
+    const { requireAuth } = await import('@/lib/auth/requireAuth')
+    vi.mocked(requireAuth).mockResolvedValueOnce({
+      ok: false,
+      response: new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+      }),
+    })
+
+    const req = makeRequest({
+      transactions: sampleTransactions,
+      fixedCosts: sampleFixedCosts,
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+  })
+
+  it('should return 429 when rate limit is exceeded', async () => {
+    const { checkRateLimit } = await import('@/lib/rateLimit')
+    vi.mocked(checkRateLimit).mockResolvedValueOnce({
+      allowed: false,
+      remaining: 0,
+      reset: Date.now() + 60000,
+    })
+
+    const req = makeRequest({
+      transactions: sampleTransactions,
+      fixedCosts: sampleFixedCosts,
+    })
+
+    const res = await POST(req)
+    expect(res.status).toBe(429)
   })
 })

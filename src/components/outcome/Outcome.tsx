@@ -2,25 +2,25 @@
 
 import { useMemo } from 'react'
 import { getCategoryChartData } from '@/helper/chart'
-import { useFinanceStore } from '@/store/financeStore'
 import { getOutcomeSummary } from '@/config/outcomeSummry'
 import AddFixedCost from '@/components/outcome/AddFixedCost'
 import CategoryChart from '@/components/charts/CategoryChart'
 import FixedCostsList from '@/components/outcome/FixedCostsList'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import MonthlyOutcomeCard from '@/components/outcome/MonthlyOutcomeCard'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import TransactionHistory from '@/components/transaction/TransactionHistory'
 
 export default function Outcome() {
-  const transactions = useFinanceStore((state: any) => state.transactions)
+  const { data: transactions = [] } = useTransactions()
 
   const outcomeTransactions = useMemo(
-    () => (transactions ?? []).filter((t: any) => t.type === 'outcome'),
+    () => transactions.filter((t) => t.type === 'expense' || t.type === 'cost'),
     [transactions],
   )
 
   const summaryItems = useMemo(
-    () => getOutcomeSummary(transactions ?? []),
+    () => getOutcomeSummary(transactions),
     [transactions],
   )
 

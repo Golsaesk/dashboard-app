@@ -16,7 +16,7 @@ type Metric = 'cost' | 'income' | 'balance'
 type Transaction = {
   date?: string
   amount?: number
-  type: 'income' | 'outcome'
+  type: 'income' | 'expense' | 'cost'
 }
 const tabs: { key: Metric; label: string }[] = [
   { key: 'income', label: 'Income' },

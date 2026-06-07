@@ -1,10 +1,31 @@
-import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
+import { NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/auth/requireAuth'
+import { checkRateLimit, rateLimitHeaders } from '@/lib/rateLimit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
+  const auth = await requireAuth()
+  if (!auth.ok) return auth.response
+
+  const rl = await checkRateLimit(auth.user.id, {
+    endpoint: 'ai-finance-status',
+    limit: 10,
+    windowSeconds: 60,
+  })
+
+  if (!rl.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests — please wait a moment' },
+      {
+        status: 429,
+        headers: { 'Retry-After': '60', ...rateLimitHeaders(rl) },
+      },
+    )
+  }
+
   try {
     const client = new OpenAI({
       apiKey: process.env.GROQ_API_KEY!,
@@ -12,7 +33,6 @@ export async function POST(req: Request) {
     })
 
     const body = await req.json().catch(() => null)
-
     if (!body) {
       return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
     }
@@ -23,7 +43,6 @@ export async function POST(req: Request) {
       .filter((t: any) => t?.type === 'income')
       .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
 
-    // FIX: accept both expense + outcome (for your tests)
     const totalExpense = transactions
       .filter((t: any) => t?.type === 'expense' || t?.type === 'outcome')
       .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
@@ -38,7 +57,6 @@ export async function POST(req: Request) {
 You are a financial AI assistant.
 
 Analyze this user's financial data:
-
 - Total income: ${totalIncome}
 - Total expense: ${totalExpense}
 - Fixed costs: ${fixedCostTotal}
@@ -56,14 +74,8 @@ Return ONLY valid JSON:
     const completion = await client.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
-        {
-          role: 'system',
-          content: 'Return ONLY valid JSON.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
+        { role: 'system', content: 'Return ONLY valid JSON.' },
+        { role: 'user', content: prompt },
       ],
       temperature: 0.4,
     })
@@ -72,12 +84,7 @@ Return ONLY valid JSON:
 
     if (!raw) {
       return NextResponse.json(
-        {
-          score: 0,
-          summary: 'Empty AI response',
-          insight: '',
-          suggestion: '',
-        },
+        { score: 0, summary: 'Empty AI response', insight: '', suggestion: '' },
         { status: 500 },
       )
     }
@@ -85,9 +92,8 @@ Return ONLY valid JSON:
     let data
     try {
       data = JSON.parse(raw)
-    } catch (e) {
+    } catch {
       console.error('JSON parse error:', raw)
-
       return NextResponse.json(
         {
           score: 0,
@@ -99,15 +105,11 @@ Return ONLY valid JSON:
       )
     }
 
-    return NextResponse.json(data)
+    return NextResponse.json(data, { headers: rateLimitHeaders(rl) })
   } catch (err: any) {
     console.error(err)
-
     return NextResponse.json(
-      {
-        error: 'Server error',
-        message: err?.message || 'unknown error',
-      },
+      { error: 'Server error', message: err?.message || 'unknown error' },
       { status: 500 },
     )
   }

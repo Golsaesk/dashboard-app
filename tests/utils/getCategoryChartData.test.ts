@@ -14,9 +14,9 @@ const COLORS = [
 describe('getCategoryChartData', () => {
   it('should group transactions by category', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 100, type: 'outcome', category: 'Food' },
-      { id: '2', amount: 200, type: 'outcome', category: 'Food' },
-      { id: '3', amount: 500, type: 'outcome', category: 'Rent' },
+      { id: '1', amount: 100, type: 'expense', category: 'Food', created_at: new Date() },
+      { id: '2', amount: 200, type: 'expense', category: 'Food', created_at: new Date() },
+      { id: '3', amount: 500, type: 'expense', category: 'Rent', created_at: new Date() },
     ]
     const result = getCategoryChartData(transactions)
     expect(result).toHaveLength(2)
@@ -30,7 +30,7 @@ describe('getCategoryChartData', () => {
 
   it('should put empty category into "Other"', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 150, type: 'outcome', category: '' },
+      { id: '1', amount: 150, type: 'expense', category: '' ,created_at: new Date()},
     ]
     const result = getCategoryChartData(transactions)
     expect(result[0].name).toBe('Other')
@@ -41,8 +41,9 @@ describe('getCategoryChartData', () => {
     const transactions: Transaction[] = COLORS.map((_, i) => ({
       id: String(i),
       amount: 100,
-      type: 'outcome' as const,
+      type: 'expense' as const,
       category: `Cat${i}`,
+      created_at: new Date(),
     }))
     const result = getCategoryChartData(transactions)
     result.forEach((item, i) => {
@@ -54,8 +55,9 @@ describe('getCategoryChartData', () => {
     const transactions: Transaction[] = Array.from({ length: 7 }, (_, i) => ({
       id: String(i),
       amount: 10,
-      type: 'outcome' as const,
+      type: 'expense' as const,
       category: `Cat${i}`,
+      created_at: new Date(),
     }))
     const result = getCategoryChartData(transactions)
     expect(result[6].color).toBe(COLORS[0])
@@ -67,7 +69,7 @@ describe('getCategoryChartData', () => {
 
   it('each item should have name, value, and color', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 200, type: 'income', category: 'Salary' },
+      { id: '1', amount: 200, type: 'income', category: 'Salary', created_at: new Date() },
     ]
     const [item] = getCategoryChartData(transactions)
     expect(item).toHaveProperty('name')

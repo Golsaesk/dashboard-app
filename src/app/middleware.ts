@@ -25,10 +25,8 @@ export async function middleware(req: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
   const path = req.nextUrl.pathname
 
-  // auth protection
   if (!user && path.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL('/auth', req.url))
   }
@@ -37,9 +35,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', req.url))
   }
 
+  if (!user && path.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   return res
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth/:path*'],
+  matcher: ['/dashboard/:path*', '/auth/:path*', '/api/:path*'],
 }

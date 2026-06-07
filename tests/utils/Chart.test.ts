@@ -5,8 +5,8 @@ import type { Transaction } from '@/type/transaction'
 describe('calculateSavings', () => {
   it('adds income and subtracts outcome correctly', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 3000, type: 'income', category: 'Salary' },
-      { id: '2', amount: 1000, type: 'outcome', category: 'Food' },
+      { id: '1', amount: 3000, type: 'income', category: 'Salary', created_at: new Date() },
+      { id: '2', amount: 1000, type: 'expense', category: 'Food', created_at: new Date()  },
     ]
     expect(calculateSavings(transactions)).toBe(2000)
   })
@@ -17,22 +17,22 @@ describe('calculateSavings', () => {
 
   it('handles only income', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 5000, type: 'income', category: 'Salary' },
+      { id: '1', amount: 5000, type: 'income', category: 'Salary', created_at: new Date() },
     ]
     expect(calculateSavings(transactions)).toBe(5000)
   })
 
-  it('handles only outcome', () => {
+  it('handles only expense', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 500, type: 'outcome', category: 'Transport' },
+      { id: '1', amount: 500, type: 'expense', category: 'Transport', created_at: new Date() },
     ]
     expect(calculateSavings(transactions)).toBe(-500)
   })
 
   it('handles negative savings when expenses exceed income', () => {
     const transactions: Transaction[] = [
-      { id: '1', amount: 1000, type: 'income', category: 'Salary' },
-      { id: '2', amount: 1500, type: 'outcome', category: 'Rent' },
+      { id: '1', amount: 1000, type: 'income', category: 'Salary', created_at: new Date() },
+      { id: '2', amount: 1500, type: 'expense', category: 'Rent', created_at: new Date() },
     ]
     expect(calculateSavings(transactions)).toBe(-500)
   })
@@ -44,12 +44,14 @@ describe('calculateSavings', () => {
         amount: '2000' as unknown as number,
         type: 'income' as const,
         category: 'Salary',
+        created_at: new Date(),
       },
       {
         id: '2',
         amount: '500' as unknown as number,
-        type: 'outcome' as const,
+        type: 'expense' as const,
         category: 'Food',
+        created_at: new Date(),
       },
     ]
     expect(calculateSavings(transactions)).toBe(1500)

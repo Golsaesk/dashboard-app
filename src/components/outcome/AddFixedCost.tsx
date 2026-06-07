@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useFinanceStore } from '@/store/financeStore'
 import { DollarSign, Tag, CalendarDays, Loader2 } from 'lucide-react'
+import { useAddFixedCost } from '@/features/fixedCosts/hooks/useFixedCosts'
 
 type Field = {
   title: string
@@ -14,9 +14,8 @@ const EMPTY: Field = { title: '', amount: '', dueDay: '' }
 
 export default function AddFixedCost() {
   const [form, setForm] = useState<Field>(EMPTY),
-    [submitting, setSubmitting] = useState(false),
     [error, setError] = useState(''),
-    addFixedCost = useFinanceStore((state) => state.addFixedCost)
+    { mutateAsync: addFixedCost, isPending } = useAddFixedCost()
 
   const set = (key: keyof Field) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm((p) => ({ ...p, [key]: e.target.value }))
@@ -34,13 +33,10 @@ export default function AddFixedCost() {
       return setError('Due day must be between 1 and 31')
 
     try {
-      setSubmitting(true)
       await addFixedCost({ title: form.title.trim(), amount, due_day: dueDay })
       setForm(EMPTY)
     } catch {
       setError('Failed to add. Try again.')
-    } finally {
-      setSubmitting(false)
     }
   }
 
@@ -121,10 +117,10 @@ export default function AddFixedCost() {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={isPending}
           className="flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-60"
         >
-          {submitting ? (
+          {isPending ? (
             <>
               <Loader2 size={15} className="animate-spin" />
               Adding...

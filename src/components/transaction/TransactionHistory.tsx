@@ -3,8 +3,8 @@
 import { Trash2 } from 'lucide-react'
 import { Transaction } from '@/type/transaction'
 import { formatCurrency } from '@/lib/utils/currency'
-import { useFinanceStore } from '@/store/financeStore'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRemoveTransaction } from '@/features/finance/hooks/useTransaction'
 
 type Props = {
   items: Transaction[]
@@ -15,10 +15,8 @@ const categoryInitials = (value?: string) =>
 
 const formatDate = (date: unknown) => {
   if (!date) return '—'
-
-  const d = new Date(date as any)
+  const d = new Date(date as string)
   if (isNaN(d.getTime())) return '—'
-
   return d.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -27,9 +25,8 @@ const formatDate = (date: unknown) => {
 }
 
 export default function TransactionHistory({ items }: Props) {
-  const removeTransaction = useFinanceStore(
-    (state: any) => state.removeTransaction,
-  )
+  // قبلاً از useFinanceStore می‌خوند — الان از React Query mutation
+  const { mutate: removeTransaction } = useRemoveTransaction()
 
   if (!items.length) {
     return (
@@ -76,7 +73,6 @@ export default function TransactionHistory({ items }: Props) {
                   <p className="text-sm font-medium text-zinc-900 dark:text-white">
                     {item.category}
                   </p>
-
                   <p className="text-xs text-zinc-400 dark:text-zinc-500">
                     {date}
                   </p>

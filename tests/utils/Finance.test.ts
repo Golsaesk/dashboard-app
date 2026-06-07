@@ -11,11 +11,11 @@ import {
 import type { Transaction } from '@/type/transaction'
 
 const mockTransactions: Transaction[] = [
-  { id: '1', amount: 5000, type: 'income', category: 'Salary' },
-  { id: '2', amount: 2000, type: 'income', category: 'Freelance' },
-  { id: '3', amount: 1000, type: 'outcome', category: 'Food' },
-  { id: '4', amount: 500, type: 'outcome', category: 'Food' },
-  { id: '5', amount: 800, type: 'outcome', category: 'Transport' },
+  { id: '1', amount: 5000, type: 'income', category: 'Salary', created_at: new Date() },
+  { id: '2', amount: 2000, type: 'income', category: 'Freelance', created_at: new Date() },
+  { id: '3', amount: 1000, type: 'expense', category: 'Food', created_at: new Date() },
+  { id: '4', amount: 500, type: 'expense', category: 'Food', created_at: new Date() },
+  { id: '5', amount: 800, type: 'expense', category: 'Transport', created_at: new Date() },
 ]
 
 describe('finance helpers', () => {
@@ -29,13 +29,13 @@ describe('finance helpers', () => {
     })
 
     it('returns 0 when no income transactions', () => {
-      const outcomes = mockTransactions.filter((t) => t.type === 'outcome')
-      expect(getTotalIncome(outcomes)).toBe(0)
+      const expenses = mockTransactions.filter((t) => t.type === 'expense')
+      expect(getTotalIncome(expenses)).toBe(0)
     })
   })
 
   describe('getTotalOutcome', () => {
-    it('sums all outcome transactions', () => {
+    it('sums all expenses transactions', () => {
       expect(getTotalOutcome(mockTransactions)).toBe(2300)
     })
 
@@ -64,7 +64,7 @@ describe('finance helpers', () => {
     })
 
     it('returns "No Source" when no income transactions', () => {
-      const outcomes = mockTransactions.filter((t) => t.type === 'outcome')
+      const outcomes = mockTransactions.filter((t) => t.type === 'expense')
       expect(getTopSource(outcomes)).toBe('No Source')
     })
   })

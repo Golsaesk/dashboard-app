@@ -13,9 +13,12 @@ import {
 type Range = '6M' | '1Y' | 'ALL'
 
 type Transaction = {
-  amount?: number
+  id: string
+  amount: number
+  category: string
   type: 'income' | 'expense' | 'cost'
-  created_at: string
+  description?: string
+  created_at: number | Date
 }
 
 export default function SpendingTrendChart({
@@ -76,7 +79,6 @@ export default function SpendingTrendChart({
 
   return (
     <div className="space-y-3">
-      {/* Range selector (اختیاری ولی کاربردی) */}
       <div className="flex gap-2 text-xs">
         {(['6M', '1Y', 'ALL'] as Range[]).map((r) => (
           <button

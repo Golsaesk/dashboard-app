@@ -2,6 +2,7 @@ import { supabase } from '@/lib/supabase/client'
 import { Transaction } from '@/type/transaction'
 
 const DEMO_KEY = 'demo_transactions'
+
 function getDemoTransactions(): Transaction[] {
   try {
     return JSON.parse(localStorage.getItem(DEMO_KEY) || '[]')
@@ -14,29 +15,27 @@ function saveDemoTransactions(data: Transaction[]): void {
   localStorage.setItem(DEMO_KEY, JSON.stringify(data))
 }
 
-function isDemo(): boolean {
-  const raw = localStorage.getItem(
-    `sb-${process.env.NEXT_PUBLIC_SUPABASE_URL?.split('//')[1]?.split('.')[0]}-auth-token`,
-  )
-  try {
-    const session = JSON.parse(raw ?? 'null')
-    return session?.user?.is_anonymous === true
-  } catch {
-    return false
+async function getVerifiedSession(): Promise<{
+  userId: string | null
+  isDemo: boolean
+}> {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) return { userId: null, isDemo: false }
+
+  return {
+    userId: user.id,
+    isDemo: user.is_anonymous === true,
   }
 }
 
-async function getUserId(): Promise<string | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  return session?.user?.id ?? null
-}
-
 export async function getTransactions(): Promise<Transaction[]> {
-  if (isDemo()) return getDemoTransactions()
+  const { userId, isDemo } = await getVerifiedSession()
 
-  const userId = await getUserId()
+  if (isDemo) return getDemoTransactions()
   if (!userId) return []
 
   const { data, error } = await supabase
@@ -49,20 +48,21 @@ export async function getTransactions(): Promise<Transaction[]> {
 
   return (data ?? []).map((t) => ({
     ...t,
-    type: t.type === 'expense' ? 'outcome' : t.type,
+    type: t.type === 'expense' ? 'expense' : t.type,
   })) as Transaction[]
 }
 
 export async function addTransaction(
   payload: Omit<Transaction, 'id'>,
 ): Promise<Transaction> {
-  if (isDemo()) {
+  const { userId, isDemo } = await getVerifiedSession()
+
+  if (isDemo) {
     const item: Transaction = { ...payload, id: crypto.randomUUID() }
     saveDemoTransactions([item, ...getDemoTransactions()])
     return item
   }
 
-  const userId = await getUserId()
   if (!userId) throw new Error('Not authenticated')
 
   const { data, error } = await supabase
@@ -76,10 +76,14 @@ export async function addTransaction(
 }
 
 export async function removeTransaction(id: string): Promise<void> {
-  if (isDemo()) {
+  const { userId, isDemo } = await getVerifiedSession()
+
+  if (isDemo) {
     saveDemoTransactions(getDemoTransactions().filter((t) => t.id !== id))
     return
   }
+
+  if (!userId) throw new Error('Not authenticated')
 
   const { error } = await supabase.from('transactions').delete().eq('id', id)
   if (error) throw error
@@ -88,13 +92,17 @@ export async function removeTransaction(id: string): Promise<void> {
 export async function updateTransaction(
   payload: Transaction,
 ): Promise<Transaction> {
-  if (isDemo()) {
+  const { userId, isDemo } = await getVerifiedSession()
+
+  if (isDemo) {
     const updated = getDemoTransactions().map((t) =>
       t.id === payload.id ? { ...t, ...payload } : t,
     )
     saveDemoTransactions(updated)
     return payload
   }
+
+  if (!userId) throw new Error('Not authenticated')
 
   const { data, error } = await supabase
     .from('transactions')
