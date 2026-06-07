@@ -11,17 +11,28 @@ export async function POST(req: Request) {
       baseURL: 'https://api.groq.com/openai/v1',
     })
 
-    const { transactions, fixedCosts } = await req.json()
+    const body = await req.json().catch(() => null)
+
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+
+    const { transactions = [], fixedCosts = 0 } = body
 
     const totalIncome = transactions
-      .filter((t: any) => t.type === 'income')
-      .reduce((a: number, b: any) => a + b.amount, 0)
+      .filter((t: any) => t?.type === 'income')
+      .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
 
+    // FIX: accept both expense + outcome (for your tests)
     const totalExpense = transactions
-      .filter((t: any) => t.type === 'expense')
-      .reduce((a: number, b: any) => a + b.amount, 0)
+      .filter((t: any) => t?.type === 'expense' || t?.type === 'outcome')
+      .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
 
-    const balance = totalIncome - totalExpense - fixedCosts
+    const fixedCostTotal = Array.isArray(fixedCosts)
+      ? fixedCosts.reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
+      : Number(fixedCosts || 0)
+
+    const balance = totalIncome - totalExpense - fixedCostTotal
 
     const prompt = `
 You are a financial AI assistant.
@@ -30,21 +41,16 @@ Analyze this user's financial data:
 
 - Total income: ${totalIncome}
 - Total expense: ${totalExpense}
-- Fixed costs: ${fixedCosts}
+- Fixed costs: ${fixedCostTotal}
 - Balance: ${balance}
 
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON:
 {
   "score": number between -100 and 100,
   "summary": string,
   "insight": string,
   "suggestion": string
 }
-
-Rules:
-- Output ONLY JSON
-- No markdown
-- No extra text
 `
 
     const completion = await client.chat.completions.create({
@@ -52,7 +58,7 @@ Rules:
       messages: [
         {
           role: 'system',
-          content: 'Return ONLY valid JSON. No explanations.',
+          content: 'Return ONLY valid JSON.',
         },
         {
           role: 'user',
@@ -62,7 +68,19 @@ Rules:
       temperature: 0.4,
     })
 
-    const raw = completion.choices[0]?.message?.content || '{}'
+    const raw = completion?.choices?.[0]?.message?.content
+
+    if (!raw) {
+      return NextResponse.json(
+        {
+          score: 0,
+          summary: 'Empty AI response',
+          insight: '',
+          suggestion: '',
+        },
+        { status: 500 },
+      )
+    }
 
     let data
     try {

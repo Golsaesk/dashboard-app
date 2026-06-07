@@ -9,6 +9,7 @@ export function useStripeCheckout() {
   const [status, setStatus] = useState<CheckoutStatus>('idle'),
     [error, setError] = useState<string | null>(null)
 
+
   const startCheckout = async () => {
     try {
       setStatus('loading')

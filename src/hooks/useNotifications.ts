@@ -15,10 +15,9 @@ export type Notification = {
 }
 
 export function useNotifications(userId?: string) {
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [open, setOpen] = useState(false)
+  const [notifications, setNotifications] = useState<Notification[]>([]),
+    [open, setOpen] = useState(false)
 
-  // initial load
   useEffect(() => {
     if (!userId) return
 
@@ -35,7 +34,6 @@ export function useNotifications(userId?: string) {
     load()
   }, [userId])
 
-  // realtime
   useEffect(() => {
     if (!userId) return
 
