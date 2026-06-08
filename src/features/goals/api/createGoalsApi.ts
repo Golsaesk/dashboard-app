@@ -10,14 +10,20 @@ export async function createGoal({
   saved: number
 }) {
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session?.user) throw new Error('Not authenticated')
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
 
-  const { error } = await supabase
-    .from('goals')
-    .insert([
-      { title, target_amount, saved_amount: saved, user_id: session.user.id },
-    ])
+  if (authError || !user) throw new Error('Not authenticated')
+
+  const { error } = await supabase.from('goals').insert([
+    {
+      title,
+      target_amount,
+      saved_amount: saved,
+      user_id: user.id,
+    },
+  ])
+
   if (error) throw error
 }
