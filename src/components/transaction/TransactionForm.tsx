@@ -106,7 +106,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                 <button
                   type="button"
                   onClick={() => {
-                    field.onChange('outcome')
+                    field.onChange('expense')
                     form.setValue('category', '')
                   }}
                   className={`flex-1 rounded-lg py-2 text-sm font-medium transition ${
@@ -115,7 +115,7 @@ export default function TransactionForm({ onSuccess }: Props) {
                       : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400'
                   }`}
                 >
-                  Outcome
+                  Expense
                 </button>
               </div>
             </FormItem>

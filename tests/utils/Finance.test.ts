@@ -2,7 +2,6 @@ import { describe, it, expect } from 'vitest'
 import {
   getTotalIncome,
   getTotalOutcome,
-  getBalance,
   getTopSource,
   getMonthlyAverage,
   getMostSpend,
@@ -11,11 +10,41 @@ import {
 import type { Transaction } from '@/type/transaction'
 
 const mockTransactions: Transaction[] = [
-  { id: '1', amount: 5000, type: 'income', category: 'Salary', created_at: new Date() },
-  { id: '2', amount: 2000, type: 'income', category: 'Freelance', created_at: new Date() },
-  { id: '3', amount: 1000, type: 'expense', category: 'Food', created_at: new Date() },
-  { id: '4', amount: 500, type: 'expense', category: 'Food', created_at: new Date() },
-  { id: '5', amount: 800, type: 'expense', category: 'Transport', created_at: new Date() },
+  {
+    id: '1',
+    amount: 5000,
+    type: 'income',
+    category: 'Salary',
+    created_at: new Date(),
+  },
+  {
+    id: '2',
+    amount: 2000,
+    type: 'income',
+    category: 'Freelance',
+    created_at: new Date(),
+  },
+  {
+    id: '3',
+    amount: 1000,
+    type: 'expense',
+    category: 'Food',
+    created_at: new Date(),
+  },
+  {
+    id: '4',
+    amount: 500,
+    type: 'expense',
+    category: 'Food',
+    created_at: new Date(),
+  },
+  {
+    id: '5',
+    amount: 800,
+    type: 'expense',
+    category: 'Transport',
+    created_at: new Date(),
+  },
 ]
 
 describe('finance helpers', () => {
@@ -41,16 +70,6 @@ describe('finance helpers', () => {
 
     it('returns 0 for empty array', () => {
       expect(getTotalOutcome([])).toBe(0)
-    })
-  })
-
-  describe('getBalance', () => {
-    it('returns income minus outcome', () => {
-      expect(getBalance(mockTransactions)).toBe(4700)
-    })
-
-    it('returns 0 for empty array', () => {
-      expect(getBalance([])).toBe(0)
     })
   })
 

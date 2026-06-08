@@ -9,7 +9,7 @@ export function getOutcomeSummary(transactions: Transaction[]) {
   const outcomeTransactions = transactions.filter((t) => t.type === 'expense')
   return [
     {
-      name: 'Total Outcome',
+      name: 'Total Expenses',
       total: getTotalOutcome(transactions),
       icon: CreditCard,
     },

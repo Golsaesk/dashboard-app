@@ -16,7 +16,7 @@ export default function MonthlyOutcomeCard() {
 
   return (
     <div className="rounded-xl border p-4">
-      <p className="text-sm text-zinc-500">Monthly Outcome</p>
+      <p className="text-sm text-zinc-500">Monthly Expense</p>
       <p className="text-xl font-semibold text-red-500">
         {formatCurrency(total)}
       </p>

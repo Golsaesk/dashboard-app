@@ -12,9 +12,7 @@ export function getTotalOutcome(transactions: Transaction[] = []) {
     .reduce((acc, t) => acc + t.amount, 0)
 }
 
-export function getBalance(transactions: Transaction[] = []) {
-  return getTotalIncome(transactions) - getTotalOutcome(transactions)
-}
+
 
 export function getTopSource(transactions: Transaction[] = []) {
   const incomeTransactions = transactions.filter((t) => t.type === 'income')

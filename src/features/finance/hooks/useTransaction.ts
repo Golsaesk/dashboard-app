@@ -14,6 +14,10 @@ import { Transaction } from '@/type/transaction'
 
 export const TRANSACTIONS_KEY = ['transactions'] as const
 
+type MutationContext = {
+  previous: Transaction[] | undefined
+}
+
 export function useTransactions() {
   return useQuery({
     queryKey: TRANSACTIONS_KEY,
@@ -24,12 +28,19 @@ export function useTransactions() {
 export function useAddTransaction(): UseMutationResult<
   Transaction,
   Error,
-  Omit<Transaction, 'id'>
+  Omit<Transaction, 'id'>,
+  MutationContext
 > {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<
+    Transaction,
+    Error,
+    Omit<Transaction, 'id'>,
+    MutationContext
+  >({
     mutationFn: addTransaction,
+
     onMutate: async (payload) => {
       await qc.cancelQueries({ queryKey: TRANSACTIONS_KEY })
       const previous = qc.getQueryData<Transaction[]>(TRANSACTIONS_KEY)
@@ -45,23 +56,31 @@ export function useAddTransaction(): UseMutationResult<
 
       return { previous }
     },
-    onSuccess: (real, _vars, ctx: any) => {
+
+    onSuccess: (real) => {
+      // replace the optimistic entry with the real one returned from server
       qc.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (old = []) =>
         old.map((t) => (t.id.startsWith('optimistic-') ? real : t)),
       )
     },
-    onError: (_err, _vars, ctx: any) => {
-      if (ctx?.previous) {
+
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
         qc.setQueryData(TRANSACTIONS_KEY, ctx.previous)
       }
     },
   })
 }
 
-export function useRemoveTransaction(): UseMutationResult<void, Error, string> {
+export function useRemoveTransaction(): UseMutationResult<
+  void,
+  Error,
+  string,
+  MutationContext
+> {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<void, Error, string, MutationContext>({
     mutationFn: removeTransaction,
 
     onMutate: async (id) => {
@@ -73,8 +92,10 @@ export function useRemoveTransaction(): UseMutationResult<void, Error, string> {
       return { previous }
     },
 
-    onError: (_err, _id, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(TRANSACTIONS_KEY, ctx.previous)
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(TRANSACTIONS_KEY, ctx.previous)
+      }
     },
   })
 }
@@ -82,11 +103,12 @@ export function useRemoveTransaction(): UseMutationResult<void, Error, string> {
 export function useUpdateTransaction(): UseMutationResult<
   Transaction,
   Error,
-  Transaction
+  Transaction,
+  MutationContext
 > {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<Transaction, Error, Transaction, MutationContext>({
     mutationFn: updateTransaction,
 
     onMutate: async (payload) => {
@@ -98,8 +120,10 @@ export function useUpdateTransaction(): UseMutationResult<
       return { previous }
     },
 
-    onError: (_err, _payload, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(TRANSACTIONS_KEY, ctx.previous)
+    onError: (_err, _payload, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(TRANSACTIONS_KEY, ctx.previous)
+      }
     },
 
     onSuccess: (real) => {

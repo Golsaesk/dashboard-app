@@ -33,7 +33,7 @@ export function getIncomeSummary(transactions: Transaction[]) {
       icon: CircleDollarSign,
     },
     {
-      name: 'Net After Outcome',
+      name: 'Net After Expenses',
       value: totalIncome - totalOutcome,
       icon: ArrowDown,
     },

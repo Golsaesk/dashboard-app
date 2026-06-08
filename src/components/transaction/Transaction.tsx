@@ -7,13 +7,14 @@ import TransactionHistory from './TransactionHistory'
 import { TransactionListSkeleton } from '@/components/skeleton/Skeleton'
 import { useTransactions } from '@/features/finance/hooks/useTransaction'
 
-type Filter = 'all' | 'income' | 'outcome'
+type Filter = 'all' | 'income' | 'expense' | 'cost'
 type Sort = 'latest' | 'earliest'
 
 const filterLabels: Record<Filter, string> = {
   all: 'All',
   income: 'Income',
-  outcome: 'Outcome',
+  expense: 'Expense',
+  cost: 'Cost', 
 }
 
 export default function Transaction() {
@@ -42,7 +43,7 @@ export default function Transaction() {
 
         <div className="flex items-center gap-2">
           <div className="flex rounded-xl border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-800">
-            {(['all', 'income', 'outcome'] as Filter[]).map((f) => (
+            {(['all', 'income', 'expense', 'cost'] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}

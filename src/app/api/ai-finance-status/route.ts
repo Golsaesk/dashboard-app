@@ -1,3 +1,4 @@
+import { z } from 'zod'
 import OpenAI from 'openai'
 import { NextResponse } from 'next/server'
 import { requireAuth } from '@/lib/auth/requireAuth'
@@ -5,7 +6,27 @@ import { checkRateLimit, rateLimitHeaders } from '@/lib/rateLimit'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
+const transactionSchema = z.object({
+  type: z.string(),
+  amount: z.union([z.number(), z.string()]),
+})
 
+const fixedCostSchema = z.object({
+  amount: z.union([z.number(), z.string()]),
+})
+
+const requestBodySchema = z.object({
+  transactions: z.array(transactionSchema).default([]),
+  fixedCosts: z.union([z.array(fixedCostSchema), z.number()]).default([]),
+})
+
+type RequestBody = z.infer<typeof requestBodySchema>
+type AiFinanceStatus = {
+  score: number
+  summary: string
+  insight: string
+  suggestion: string
+}
 export async function POST(req: Request) {
   const auth = await requireAuth()
   if (!auth.ok) return auth.response
@@ -26,30 +47,48 @@ export async function POST(req: Request) {
     )
   }
 
+  let body: RequestBody
   try {
-    const client = new OpenAI({
+    const raw = await req.json().catch(() => null)
+    if (!raw) {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+    }
+    const parsed = requestBodySchema.safeParse(raw)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: 'Invalid request body', details: parsed.error.flatten() },
+        { status: 400 },
+      )
+    }
+    body = parsed.data
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const { transactions, fixedCosts } = body
+
+  try {
+    const openai = new OpenAI({
       apiKey: process.env.GROQ_API_KEY!,
       baseURL: 'https://api.groq.com/openai/v1',
     })
 
-    const body = await req.json().catch(() => null)
-    if (!body) {
-      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
-    }
-
-    const { transactions = [], fixedCosts = 0 } = body
+    const toNumber = (v: number | string): number => Number(v) || 0
 
     const totalIncome = transactions
-      .filter((t: any) => t?.type === 'income')
-      .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
+      .filter((t) => t.type === 'income')
+      .reduce((acc, t) => acc + toNumber(t.amount), 0)
 
     const totalExpense = transactions
-      .filter((t: any) => t?.type === 'expense' || t?.type === 'outcome')
-      .reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
+      .filter(
+        (t) =>
+          t.type === 'expense' || t.type === 'outcome' || t.type === 'cost',
+      )
+      .reduce((acc, t) => acc + toNumber(t.amount), 0)
 
     const fixedCostTotal = Array.isArray(fixedCosts)
-      ? fixedCosts.reduce((a: number, b: any) => a + Number(b.amount || 0), 0)
-      : Number(fixedCosts || 0)
+      ? fixedCosts.reduce((acc, fc) => acc + toNumber(fc.amount), 0)
+      : toNumber(fixedCosts)
 
     const balance = totalIncome - totalExpense - fixedCostTotal
 
@@ -71,7 +110,7 @@ Return ONLY valid JSON:
 }
 `
 
-    const completion = await client.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: 'Return ONLY valid JSON.' },
@@ -89,11 +128,11 @@ Return ONLY valid JSON:
       )
     }
 
-    let data
+    let data: AiFinanceStatus
     try {
-      data = JSON.parse(raw)
+      data = JSON.parse(raw) as AiFinanceStatus
     } catch {
-      console.error('JSON parse error:', raw)
+      console.error('[ai-finance-status] JSON parse error:', raw)
       return NextResponse.json(
         {
           score: 0,
@@ -106,10 +145,11 @@ Return ONLY valid JSON:
     }
 
     return NextResponse.json(data, { headers: rateLimitHeaders(rl) })
-  } catch (err: any) {
-    console.error(err)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Unknown server error'
+    console.error('[ai-finance-status]', message)
     return NextResponse.json(
-      { error: 'Server error', message: err?.message || 'unknown error' },
+      { error: 'Server error', message },
       { status: 500 },
     )
   }
