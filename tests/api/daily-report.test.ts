@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { NextRequest } from 'next/server'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const { mockCreate } = vi.hoisted(() => ({ mockCreate: vi.fn() }))
 
@@ -20,7 +20,6 @@ vi.mock('@/lib/rateLimit', () => ({
   rateLimitHeaders: vi.fn().mockReturnValue({}),
 }))
 
-// ✅ Mock Supabase — getTelegramChatId داخل route از این استفاده می‌کنه
 vi.mock('@/lib/supabase/server', () => ({
   createSupabaseServer: vi.fn().mockResolvedValue({
     from: vi.fn().mockReturnValue({

@@ -1,9 +1,10 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { QueryProvider } from '@/providers/query-provider'
 import ThemeProvider from '@/providers/themeProvider'
 import { AuthProvider } from '@/providers/AuthProvider'
+import { QueryProvider } from '@/providers/query-provider'
+import { useAuthInit } from '@/features/auth/hooks/useAuthInit'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,6 +26,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  useAuthInit()
   return (
     <html
       lang="en"
@@ -32,9 +34,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ThemeProvider>
-          <QueryProvider>
-            <AuthProvider>{children}</AuthProvider>
-          </QueryProvider>
+          <QueryProvider>{children}</QueryProvider>
         </ThemeProvider>
       </body>
     </html>

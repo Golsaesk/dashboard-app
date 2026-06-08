@@ -9,12 +9,11 @@ import {
 } from '@/helper/finance'
 
 export function getIncomeSummary(transactions: Transaction[]) {
-  const incomeTransactions = transactions.filter((t) => t.type === 'income')
-
-  const totalIncome = getTotalIncome(transactions)
-  const totalOutcome = getTotalOutcome(transactions)
-  const topSource = getTopSource(transactions)
-  const monthlyAverage = getMonthlyAverage(incomeTransactions)
+  const incomeTransactions = transactions.filter((t) => t.type === 'income'),
+    totalIncome = getTotalIncome(transactions),
+    totalOutcome = getTotalOutcome(transactions),
+    topSource = getTopSource(transactions),
+    monthlyAverage = getMonthlyAverage(incomeTransactions)
 
   return [
     {

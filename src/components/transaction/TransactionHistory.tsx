@@ -25,7 +25,6 @@ const formatDate = (date: unknown) => {
 }
 
 export default function TransactionHistory({ items }: Props) {
-  // قبلاً از useFinanceStore می‌خوند — الان از React Query mutation
   const { mutate: removeTransaction } = useRemoveTransaction()
 
   if (!items.length) {

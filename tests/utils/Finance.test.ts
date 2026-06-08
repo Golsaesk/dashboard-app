@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest'
+import type { Transaction } from '@/type/transaction'
 import {
   getTotalIncome,
   getTotalOutcome,
@@ -7,7 +8,6 @@ import {
   getMostSpend,
   getNetSaving,
 } from '@/helper/finance'
-import type { Transaction } from '@/type/transaction'
 
 const mockTransactions: Transaction[] = [
   {

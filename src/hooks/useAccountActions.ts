@@ -2,16 +2,13 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
 
 export function useAccountActions() {
-  const [deleting, setDeleting] = useState(false)
-
-  const router = useRouter()
-
-  const setAuth = useAuthStore((s) => s.setAuth)
+  const [deleting, setDeleting] = useState(false),
+    router = useRouter(),
+    setAuth = useAuthStore((s) => s.setAuth)
 
   const logout = async () => {
     await supabase.auth.signOut()

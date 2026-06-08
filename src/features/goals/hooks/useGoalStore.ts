@@ -40,12 +40,6 @@ export const useGoalStore = create<GoalStore>((set, get) => ({
   },
 
   createGoal: async (data) => {
-    /**
-     * قبلاً مستقیم supabase.from('goals').insert() بدون user_id بود
-     * یعنی اگه RLS در Supabase set نبود، هر کاربری داده بدون owner می‌ذاشت.
-     *
-     * الان getUser() برای verify + user_id صریح در insert
-     */
     const {
       data: { user },
       error: authError,
@@ -67,12 +61,6 @@ export const useGoalStore = create<GoalStore>((set, get) => ({
   },
 
   updateGoal: async (id, data) => {
-    /**
-     * قبلاً فقط .eq('id', id) بود — بدون user_id چک
-     * یعنی اگه RLS نبود، هر کاربری goal هر کاربر دیگه‌ای رو آپدیت می‌کرد.
-     *
-     * الان .eq('user_id', user.id) صریح اضافه شده
-     */
     const {
       data: { user },
       error: authError,

@@ -1,9 +1,9 @@
 'use client'
-import { useState } from 'react'
-import { Lock, Loader2, Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { useAuthStore } from '@/store/authStore'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase/client'
+import { useAuthStore } from '@/store/authStore'
+import { Lock, Loader2, Sparkles } from 'lucide-react'
 
 type FeatureGateProps = {
   children: React.ReactNode

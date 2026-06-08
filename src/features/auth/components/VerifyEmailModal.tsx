@@ -2,11 +2,7 @@
 
 import ModalShell from './ModalShell'
 
-export default function VerifyEmailModal({
-  onClose,
-}: {
-  onClose: () => void
-}) {
+export default function VerifyEmailModal({ onClose }: { onClose: () => void }) {
   return (
     <ModalShell
       onClose={onClose}

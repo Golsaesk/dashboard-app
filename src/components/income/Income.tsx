@@ -18,9 +18,9 @@ import {
 } from '@/components/skeleton/Skeleton'
 
 export default function IncomePage() {
-  const { data: transactions = [], isLoading: txLoading } = useTransactions()
-  const { data: goals, isLoading: goalsLoading } = useGoalsProgress()
-  const [mounted, setMounted] = useState(false)
+  const { data: transactions = [], isLoading: txLoading } = useTransactions(),
+    { data: goals, isLoading: goalsLoading } = useGoalsProgress(),
+    [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -65,7 +65,7 @@ export default function IncomePage() {
         </section>
 
         <section className="space-y-4">
-          <GoalCarousel  isLoading={goalsLoading} />
+          <GoalCarousel isLoading={goalsLoading} />
         </section>
 
         <section className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">

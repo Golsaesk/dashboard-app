@@ -38,7 +38,6 @@ export function AddTransactionSheet() {
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-zinc-200 bg-white sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border dark:border-zinc-700 dark:bg-zinc-900"
             >
-              
               <div className="flex justify-center pt-3 sm:hidden">
                 <div className="h-1 w-10 rounded-full bg-zinc-200 dark:bg-zinc-700" />
               </div>

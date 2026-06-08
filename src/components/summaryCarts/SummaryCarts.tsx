@@ -1,6 +1,6 @@
 import { ArrowDown, ArrowUp } from 'lucide-react'
-import { SummaryCartsItem } from '@/type/summaryCart'
 import { formatCurrency } from '@/lib/utils/currency'
+import { SummaryCartsItem } from '@/type/summaryCart'
 
 type Props = {
   items: SummaryCartsItem[]
@@ -30,7 +30,7 @@ export default function SummaryCards({ items }: Props) {
             </div>
 
             <h3 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-white">
-              {item.value ? item.value : formatCurrency(item.total || 0)}
+              {item.value ? item.value : formatCurrency(Number(item.total) || 0)}
             </h3>
 
             <div

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { calculateSavings } from '@/features/finance/utils/calcSavings'
 import type { Transaction } from '@/type/transaction'
+import { calculateSavings } from '@/features/finance/utils/calcSavings'
 
 describe('calculateSavings', () => {
   it('adds income and subtracts outcome correctly', () => {

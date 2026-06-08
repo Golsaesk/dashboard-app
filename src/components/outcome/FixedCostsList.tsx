@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, CalendarDays, Plus } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils/currency'
+import { Trash2, CalendarDays, Plus } from 'lucide-react'
 import {
   useFixedCosts,
   useAddFixedCost,

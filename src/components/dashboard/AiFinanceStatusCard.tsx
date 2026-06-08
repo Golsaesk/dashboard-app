@@ -25,6 +25,7 @@ export default function AiFinanceStatusCard() {
     { data: fixedCosts = [] } = useFixedCosts(),
     [status, setStatus] = useState<Status>('idle'),
     [data, setData] = useState<AiFinanceResponse | null>(null)
+
   const fetchAnalysis = useCallback(async () => {
     if (!transactions.length) {
       setStatus('idle')

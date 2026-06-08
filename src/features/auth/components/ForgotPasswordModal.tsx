@@ -9,9 +9,9 @@ export default function ForgotPasswordModal({
 }: {
   onClose: () => void
 }) {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
+  const [email, setEmail] = useState(''),
+    [loading, setLoading] = useState(false),
+    [success, setSuccess] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

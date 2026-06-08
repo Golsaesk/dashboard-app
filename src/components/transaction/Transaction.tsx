@@ -14,14 +14,14 @@ const filterLabels: Record<Filter, string> = {
   all: 'All',
   income: 'Income',
   expense: 'Expense',
-  cost: 'Cost', 
+  cost: 'Cost',
 }
 
 export default function Transaction() {
-  const { data: transactions = [], isLoading } = useTransactions()
-  const [open, setOpen] = useState(false)
-  const [filter, setFilter] = useState<Filter>('all')
-  const [sort, setSort] = useState<Sort>('latest')
+  const { data: transactions = [], isLoading } = useTransactions(),
+    [open, setOpen] = useState(false),
+    [filter, setFilter] = useState<Filter>('all'),
+    [sort, setSort] = useState<Sort>('latest')
 
   const processedItems = useMemo(() => {
     let data = [...transactions].filter((t) => t?.type)

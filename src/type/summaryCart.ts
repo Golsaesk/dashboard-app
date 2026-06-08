@@ -2,8 +2,9 @@ import { LucideIcon } from 'lucide-react'
 
 export type SummaryCartsItem = {
   name: string
-  total?: number
+  total?: number | string
   value?: number | string
   compared?: number
   icon?: LucideIcon
+
 }

@@ -5,21 +5,17 @@ import { useTheme } from 'next-themes'
 import SettingSection from './SettingSections'
 import { useSettingsStore } from '@/store/settingStore'
 import EditProfileModal from './modals/EditProfileModal'
+import { getSettingsData } from '@/config/setting.config'
 import DeleteAccountModal from './modals/DeleteAccountModal'
 import { useAccountActions } from '@/hooks/useAccountActions'
-import { getSettingsData } from '@/config/setting.config'
 
 export default function Setting() {
-  const [openProfile, setOpenProfile] = useState(false)
-
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
-  const { theme, setTheme } = useTheme()
-
-  const { notifications, toggleNotifications, currency, setCurrency } =
-    useSettingsStore()
-
-  const { logout, deleteAccount, deleting } = useAccountActions()
+  const [openProfile, setOpenProfile] = useState(false),
+    [showDeleteConfirm, setShowDeleteConfirm] = useState(false),
+    { theme, setTheme } = useTheme(),
+    { notifications, toggleNotifications, currency, setCurrency } =
+      useSettingsStore(),
+    { logout, deleteAccount, deleting } = useAccountActions()
 
   const sections = getSettingsData({
     darkMode: theme === 'dark',

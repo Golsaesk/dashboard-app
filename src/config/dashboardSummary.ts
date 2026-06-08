@@ -1,6 +1,11 @@
 import { Transaction } from '@/type/transaction'
-import { ArrowDown, ArrowUp, PiggyBank, Wallet } from 'lucide-react'
-import { getNetSaving, getTotalIncome, getTotalOutcome } from '@/helper/finance'
+import { ArrowDown, ArrowUp, PiggyBank, Trophy } from 'lucide-react'
+import {
+  getNetSaving,
+  getTopSource,
+  getTotalIncome,
+  getTotalOutcome,
+} from '@/helper/finance'
 
 export function getDashboardSummary(transactions: Transaction[]) {
   return [
@@ -20,6 +25,11 @@ export function getDashboardSummary(transactions: Transaction[]) {
       name: 'Net Saving',
       total: getNetSaving(transactions),
       icon: PiggyBank,
+    },
+    {
+      name: 'Top Source',
+      total: getTopSource(transactions),
+      icon: Trophy,
     },
   ]
 }

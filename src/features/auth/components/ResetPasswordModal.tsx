@@ -2,17 +2,17 @@
 
 import { useState } from 'react'
 import ModalShell from './ModalShell'
-import { supabase } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase/client'
 
 export default function ResetPasswordModal({
   onClose,
 }: {
   onClose: () => void
 }) {
-  const router = useRouter()
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
+  const router = useRouter(),
+    [password, setPassword] = useState(''),
+    [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()

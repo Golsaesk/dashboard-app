@@ -1,6 +1,6 @@
-import { createSupabaseServer } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import type { User } from '@supabase/supabase-js'
+import { createSupabaseServer } from '@/lib/supabase/server'
 
 export type AuthResult =
   | { ok: true; user: User; response?: never }

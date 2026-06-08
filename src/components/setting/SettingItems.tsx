@@ -10,7 +10,6 @@ type Props = {
 
 export default function SettingsItem({ item, onToggle, onSelect }: Props) {
   const Icon = item.icon
-
   const isDanger = item.type === 'button' && item.variant === 'danger'
 
   return (

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { getCategoryChartData } from '@/helper/chart'
 import { Transaction } from '@/type/transaction'
+import { getCategoryChartData } from '@/helper/chart'
 
 const COLORS = [
   '#0EA5E9',

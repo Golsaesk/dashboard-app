@@ -1,8 +1,8 @@
 'use client'
 
 import { useMemo } from 'react'
-import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import { formatCurrency } from '@/lib/utils/currency'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 
 export default function MonthlyOutcomeCard() {
   const { data: transactions = [] } = useTransactions()

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/client'
 import ThemeProvider from '@/providers/themeProvider'
 
 export default function Home() {
+ 
   const router = useRouter()
 
   async function handleDemo() {

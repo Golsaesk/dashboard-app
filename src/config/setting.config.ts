@@ -1,7 +1,6 @@
-import { Bell, DollarSign, LogOut, Moon, Trash2, User } from 'lucide-react'
-
-import { SettingsSection } from '../type/setting'
 import { Currency } from '@/store/settingStore'
+import { SettingsSection } from '../type/setting'
+import { Bell, DollarSign, LogOut, Moon, Trash2, User } from 'lucide-react'
 
 type Props = {
   darkMode: boolean

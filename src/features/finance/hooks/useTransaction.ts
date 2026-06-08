@@ -1,3 +1,4 @@
+import { Transaction } from '@/type/transaction'
 import {
   useQuery,
   useMutation,
@@ -10,7 +11,6 @@ import {
   removeTransaction,
   updateTransaction,
 } from '../api/transactionsApi'
-import { Transaction } from '@/type/transaction'
 
 export const TRANSACTIONS_KEY = ['transactions'] as const
 
@@ -58,7 +58,6 @@ export function useAddTransaction(): UseMutationResult<
     },
 
     onSuccess: (real) => {
-      // replace the optimistic entry with the real one returned from server
       qc.setQueryData<Transaction[]>(TRANSACTIONS_KEY, (old = []) =>
         old.map((t) => (t.id.startsWith('optimistic-') ? real : t)),
       )

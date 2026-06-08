@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest'
 import { useAuthStore } from '@/store/authStore'
+import { describe, it, expect, beforeEach } from 'vitest'
 import type { User, Session } from '@supabase/supabase-js'
 
 describe('useAuthStore', () => {

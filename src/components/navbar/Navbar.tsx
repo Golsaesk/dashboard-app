@@ -1,13 +1,13 @@
 'use client'
 
-import MenuContent from './MenuContent'
 import { useState } from 'react'
+import MenuContent from './MenuContent'
 import { usePathname } from 'next/navigation'
+import { useAuthStore } from '@/store/authStore'
 import NotificationPopup from './NotificationPopup'
 import { Bell, BellRing, Menu } from 'lucide-react'
 import { mobileMenuItems } from '@/config/menu.config'
 import { useNotifications } from '@/hooks/useNotifications'
-import { useAuthStore } from '@/store/authStore'
 
 const titles: Record<string, string> = {
   '/dashboard': 'Dashboard',

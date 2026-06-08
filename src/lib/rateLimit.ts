@@ -1,15 +1,25 @@
-let Ratelimit: any
-let Redis: any
+import type { Redis as RedisType } from '@upstash/redis'
+import type { Ratelimit as RatelimitType } from '@upstash/ratelimit'
 
-async function getClients() {
-  if (!Ratelimit || !Redis) {
-    ;({ Ratelimit } = await import('@upstash/ratelimit'))
-    ;({ Redis } = await import('@upstash/redis'))
+let RatelimitClass: typeof RatelimitType | null = null
+let RedisClass: typeof RedisType | null = null
+
+async function getClients(): Promise<{
+  Ratelimit: typeof RatelimitType
+  Redis: typeof RedisType
+}> {
+  if (!RatelimitClass || !RedisClass) {
+    const [rlMod, redisMod] = await Promise.all([
+      import('@upstash/ratelimit'),
+      import('@upstash/redis'),
+    ])
+    RatelimitClass = rlMod.Ratelimit
+    RedisClass = redisMod.Redis
   }
-  return { Ratelimit, Redis }
+  return { Ratelimit: RatelimitClass, Redis: RedisClass }
 }
 
-const limiters: Record<string, any> = {}
+const limiters: Map<string, RatelimitType> = new Map()
 
 export interface RateLimitConfig {
   endpoint: string
@@ -33,7 +43,7 @@ export async function checkRateLimit(
     !process.env.UPSTASH_REDIS_REST_URL ||
     !process.env.UPSTASH_REDIS_REST_TOKEN
   ) {
-    console.warn('[rateLimit] Upstash env vars not set — skipped')
+    console.warn('[rateLimit] Upstash env vars not set — skipping rate limit')
     return {
       allowed: true,
       remaining: limit,
@@ -42,21 +52,26 @@ export async function checkRateLimit(
   }
 
   try {
-    const { Ratelimit: RL, Redis: R } = await getClients()
+    const { Ratelimit, Redis } = await getClients()
 
-    if (!limiters[endpoint]) {
-      const redis = new R({
+    if (!limiters.has(endpoint)) {
+      const redis = new Redis({
         url: process.env.UPSTASH_REDIS_REST_URL,
         token: process.env.UPSTASH_REDIS_REST_TOKEN,
       })
-      limiters[endpoint] = new RL({
-        redis,
-        limiter: RL.slidingWindow(limit, `${windowSeconds} s`),
-        prefix: `rl:${endpoint}`,
-      })
+      limiters.set(
+        endpoint,
+        new Ratelimit({
+          redis,
+          limiter: Ratelimit.slidingWindow(limit, `${windowSeconds} s`),
+          prefix: `rl:${endpoint}`,
+        }),
+      )
     }
 
-    const result = await limiters[endpoint].limit(`user:${userId}`)
+    const limiter = limiters.get(endpoint)!
+    const result = await limiter.limit(`user:${userId}`)
+
     return {
       allowed: result.success,
       remaining: result.remaining,

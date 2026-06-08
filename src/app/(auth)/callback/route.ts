@@ -1,14 +1,12 @@
-import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 export async function GET(req: Request) {
-  const url = new URL(req.url)
-  const code = url.searchParams.get('code')
-
-  const cookieStore = await cookies() // ✅ مهم
-
-  const response = NextResponse.redirect(new URL('/dashboard', req.url))
+  const url = new URL(req.url),
+    code = url.searchParams.get('code'),
+    cookieStore = await cookies(),
+    response = NextResponse.redirect(new URL('/dashboard', req.url))
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

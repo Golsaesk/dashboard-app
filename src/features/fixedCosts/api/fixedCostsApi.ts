@@ -37,9 +37,6 @@ async function getAuthState(): Promise<{
     isDemo: user.is_anonymous === true,
   }
 }
-
-// ─── Public API ───────────────────────────────────────────────────────────
-
 export async function getFixedCosts(): Promise<FixedCost[]> {
   const { userId, isDemo } = await getAuthState()
 
@@ -87,7 +84,6 @@ export async function removeFixedCost(id: string): Promise<void> {
 
   if (!userId) throw new Error('Not authenticated')
 
-  // RLS این رو enforce می‌کنه، ولی user_id چک صریح امنیت بیشتری میده
   const { error } = await supabase
     .from('fixed_costs')
     .delete()

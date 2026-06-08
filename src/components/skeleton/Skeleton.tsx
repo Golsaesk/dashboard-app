@@ -1,5 +1,3 @@
-// components/skeleton/Skeleton.tsx
-// ─── Base pulse animation ────────────────────────────────────────────────────
 function Pulse({ className = '' }: { className?: string }) {
   return (
     <div
@@ -8,7 +6,6 @@ function Pulse({ className = '' }: { className?: string }) {
   )
 }
 
-// ─── Card Skeleton — برای SummaryCards ──────────────────────────────────────
 export function CardSkeleton() {
   return (
     <div className="flex flex-col gap-3 rounded-2xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
@@ -21,8 +18,6 @@ export function CardSkeleton() {
     </div>
   )
 }
-
-// ─── Cards Grid Skeleton — برای کل grid از کارت‌ها ──────────────────────────
 export function CardsGridSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="grid w-full grid-cols-2 gap-4 lg:grid-cols-4">
@@ -32,22 +27,17 @@ export function CardsGridSkeleton({ count = 4 }: { count?: number }) {
     </div>
   )
 }
-
-// ─── Chart Skeleton — برای Line/Area chart‌ها ────────────────────────────────
 export function ChartSkeleton() {
   return (
     <div className="space-y-5">
-      {/* Tabs */}
       <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
         {[60, 72, 56].map((w, i) => (
           <Pulse key={i} className={`h-8 w-${w} flex-1`} />
         ))}
       </div>
-      {/* Chart area */}
       <div className="relative h-64 w-full overflow-hidden rounded-xl bg-zinc-100 dark:bg-zinc-800">
         <div className="absolute inset-0 animate-pulse" />
-        {/* Fake bars to simulate chart */}
-        <div className="absolute bottom-0 left-0 right-0 flex items-end justify-around gap-2 px-4 pb-4">
+        <div className="absolute right-0 bottom-0 left-0 flex items-end justify-around gap-2 px-4 pb-4">
           {[60, 80, 45, 90, 55, 70, 40, 85, 65, 75, 50, 95].map((h, i) => (
             <div
               key={i}
@@ -61,11 +51,10 @@ export function ChartSkeleton() {
   )
 }
 
-// ─── Pie Chart Skeleton — برای CategoryChart و GoalChart ────────────────────
 export function PieChartSkeleton() {
   return (
     <div className="flex flex-col gap-8 md:flex-row md:items-center">
-      <div className="mx-auto h-52 w-52 animate-pulse rounded-full bg-zinc-100 dark:bg-zinc-800 md:mx-0" />
+      <div className="mx-auto h-52 w-52 animate-pulse rounded-full bg-zinc-100 md:mx-0 dark:bg-zinc-800" />
       <div className="flex-1 space-y-3">
         {Array.from({ length: 4 }).map((_, i) => (
           <div key={i} className="flex items-center justify-between px-2 py-2">
@@ -83,8 +72,6 @@ export function PieChartSkeleton() {
     </div>
   )
 }
-
-// ─── Row Skeleton — برای TransactionHistory ──────────────────────────────────
 export function RowSkeleton() {
   return (
     <div className="flex items-center justify-between rounded-xl border border-zinc-100 bg-white p-3.5 dark:border-zinc-800 dark:bg-zinc-900">
@@ -100,7 +87,6 @@ export function RowSkeleton() {
   )
 }
 
-// ─── Transaction List Skeleton ───────────────────────────────────────────────
 export function TransactionListSkeleton({ count = 5 }: { count?: number }) {
   return (
     <div className="flex flex-col gap-2">
@@ -111,7 +97,6 @@ export function TransactionListSkeleton({ count = 5 }: { count?: number }) {
   )
 }
 
-// ─── Goal Skeleton ───────────────────────────────────────────────────────────
 export function GoalSkeleton() {
   return (
     <div className="flex items-center gap-6">
@@ -135,7 +120,6 @@ export function GoalSkeleton() {
   )
 }
 
-// ─── Full Page Skeletons — آماده برای هر صفحه ───────────────────────────────
 export function DashboardSkeleton() {
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -219,12 +203,10 @@ export function ReportSkeleton() {
   )
 }
 
-// ─── Profile Skeleton ─────────────────────────────────────────────────────────
 export function ProfileSkeleton() {
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        {/* Profile Info */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <Pulse className="mb-4 h-5 w-20" />
           <div className="flex items-center gap-4">
@@ -236,13 +218,11 @@ export function ProfileSkeleton() {
           </div>
         </div>
 
-        {/* Summary */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <Pulse className="mb-4 h-5 w-40" />
           <CardsGridSkeleton count={4} />
         </div>
 
-        {/* Goals */}
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
           <div className="mb-4 flex items-center justify-between">
             <Pulse className="h-5 w-16" />
@@ -250,7 +230,10 @@ export function ProfileSkeleton() {
           </div>
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50">
+              <div
+                key={i}
+                className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50"
+              >
                 <div className="mb-2 flex items-center justify-between">
                   <Pulse className="h-4 w-28" />
                   <Pulse className="h-6 w-20 rounded-lg" />
@@ -269,22 +252,22 @@ export function ProfileSkeleton() {
   )
 }
 
-// ─── Pricing Skeleton ─────────────────────────────────────────────────────────
 export function PricingSkeleton() {
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-16 dark:bg-zinc-950">
       <div className="mx-auto max-w-4xl">
-        {/* Header */}
         <div className="mx-auto mb-14 flex max-w-xl flex-col items-center gap-3">
           <Pulse className="h-7 w-24 rounded-full" />
           <Pulse className="h-9 w-64" />
           <Pulse className="h-4 w-80" />
         </div>
 
-        {/* Cards */}
         <div className="grid gap-6 md:grid-cols-2">
           {[1, 2].map((i) => (
-            <div key={i} className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900">
+            <div
+              key={i}
+              className="rounded-2xl border border-zinc-200 bg-white p-8 dark:border-zinc-800 dark:bg-zinc-900"
+            >
               <Pulse className="mb-2 h-5 w-16" />
               <Pulse className="mb-4 h-10 w-24" />
               <Pulse className="mb-6 h-4 w-40" />
@@ -305,7 +288,6 @@ export function PricingSkeleton() {
   )
 }
 
-// ─── Setting Skeleton ─────────────────────────────────────────────────────────
 export function SettingSkeleton() {
   return (
     <div className="min-h-screen bg-zinc-50 p-6 dark:bg-zinc-950">
@@ -317,7 +299,10 @@ export function SettingSkeleton() {
               <Pulse className="h-4 w-24" />
               <div className="divide-y divide-zinc-100 rounded-2xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
                 {[1].map((j) => (
-                  <div key={j} className="flex items-center justify-between p-4">
+                  <div
+                    key={j}
+                    className="flex items-center justify-between p-4"
+                  >
                     <div className="flex items-center gap-3">
                       <Pulse className="h-9 w-9 rounded-xl" />
                       <div className="space-y-1.5">
