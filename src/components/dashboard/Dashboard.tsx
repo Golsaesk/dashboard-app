@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import AiHighlight from './AiHighlight'
 import Chart from '@/components/charts/Chart'
 import AiFinanceStatusCard from './AiFinanceStatusCard'
 import { FeatureGate } from '@/components/auth/FeatureGate'
@@ -27,6 +28,10 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
       <div className="mx-auto flex max-w-6xl flex-col gap-6">
+        <div className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <AiHighlight />
+        </div>
+
         <div className="w-full">
           <FeatureGate variant="overlay" title="AI Features">
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

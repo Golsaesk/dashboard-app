@@ -1,5 +1,6 @@
 'use client'
 
+import AiHighlight from './AiHighlight'
 import { useEffect, useState, useCallback } from 'react'
 import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import { useFixedCosts } from '@/features/fixedCosts/hooks/useFixedCosts'
@@ -64,25 +65,22 @@ export default function AiFinanceStatusCard() {
 
   if (!transactions.length) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-zinc-300 bg-white p-8 text-center dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex flex-col items-center justify-center gap-3 text-center">
         <Brain className="h-8 w-8 text-emerald-500" />
         <h3 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
           AI Financial Assistant
         </h3>
         <p className="text-xs text-zinc-500">
-          Add your transactions and expenses to get AI-powered financial
-          insights
-        </p>
-        <p className="text-xs text-emerald-600">
-          "I'll analyze your money habits instantly."
+          Add your transactions to unlock AI insights
         </p>
       </div>
     )
   }
 
   return (
-    <div className="w-full rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="mb-4 flex items-center justify-between">
+    <div className="w-full space-y-4">
+      <AiHighlight />
+      <div className="flex items-center justify-between">
         <h2 className="text-sm font-semibold text-zinc-800 dark:text-zinc-100">
           AI Financial Health
         </h2>

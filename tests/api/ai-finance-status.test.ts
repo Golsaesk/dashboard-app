@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-const { createMock } = vi.hoisted(() => ({ createMock: vi.fn() }))
-
+const createMock = vi.fn()
 vi.mock('@/lib/auth/requireAuth', () => ({
   requireAuth: vi.fn().mockResolvedValue({
     ok: true,
@@ -20,10 +19,15 @@ vi.mock('@/lib/rateLimit', () => ({
 }))
 
 vi.mock('openai', () => {
-  const OpenAI = function (this: any) {
-    this.chat = { completions: { create: createMock } }
+  return {
+    default: class OpenAI {
+      chat = {
+        completions: {
+          create: createMock,
+        },
+      }
+    },
   }
-  return { default: OpenAI }
 })
 
 import { POST } from '@/app/api/ai-finance-status/route'
@@ -31,29 +35,29 @@ import { POST } from '@/app/api/ai-finance-status/route'
 describe('POST /api/ai-finance-status', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+
     createMock.mockResolvedValue({
       choices: [
         {
           message: {
             content: JSON.stringify({
-              score: 70,
-              summary: 'Your financial status is good',
-              insight: 'Income is higher than expenses',
-              suggestion: 'Try to save more',
+              score: 75,
+              summary: 'Healthy financial status',
+              insight: 'Income > expenses',
+              suggestion: 'Increase savings',
             }),
           },
         },
       ],
     })
   })
-
-  it('should return score and summary', async () => {
+  it('returns structured AI response', async () => {
     const req = new Request('http://localhost', {
       method: 'POST',
       body: JSON.stringify({
         transactions: [
-          { type: 'income', amount: 5000 },
-          { type: 'expense', amount: 1000 },
+          { type: 'income', amount: 5000, category: 'salary' },
+          { type: 'expense', amount: 1000, category: 'food' },
         ],
         fixedCosts: 500,
       }),
@@ -63,21 +67,64 @@ describe('POST /api/ai-finance-status', () => {
     const data = await res.json()
 
     expect(res.status).toBe(200)
-    expect(data.score).toBeDefined()
-    expect(data.summary).toBeDefined()
+
+    expect(data).toHaveProperty('score')
+    expect(data).toHaveProperty('summary')
+    expect(data).toHaveProperty('insight')
+    expect(data).toHaveProperty('suggestion')
   })
 
-  it('should return status 500 when OpenAI returns invalid JSON', async () => {
+  it('returns fallback when AI returns invalid JSON', async () => {
     createMock.mockResolvedValueOnce({
-      choices: [{ message: { content: 'invalid json' } }],
+      choices: [
+        {
+          message: {
+            content: 'invalid json here',
+          },
+        },
+      ],
     })
 
     const req = new Request('http://localhost', {
       method: 'POST',
-      body: JSON.stringify({ transactions: [], fixedCosts: 0 }),
+      body: JSON.stringify({
+        transactions: [],
+        fixedCosts: 0,
+      }),
     })
 
     const res = await POST(req)
+    const data = await res.json()
+
+    expect(res.status).toBe(200) // ⚠️ IMPORTANT: fallback returns 200 now
+    expect(data).toHaveProperty('score')
+    expect(data).toHaveProperty('summary')
+    expect(data.summary).toContain('Fallback')
+  })
+
+  it('handles empty AI response', async () => {
+    createMock.mockResolvedValueOnce({
+      choices: [
+        {
+          message: {
+            content: null,
+          },
+        },
+      ],
+    })
+
+    const req = new Request('http://localhost', {
+      method: 'POST',
+      body: JSON.stringify({
+        transactions: [],
+        fixedCosts: 0,
+      }),
+    })
+
+    const res = await POST(req)
+    const data = await res.json()
+
     expect(res.status).toBe(500)
+    expect(data.summary).toBe('Empty AI response')
   })
 })

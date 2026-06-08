@@ -10,6 +10,7 @@ export function getTotalIncome(transactions: Transaction[] = []): number {
     .reduce((acc, t) => acc + t.amount, 0)
 }
 
+
 export function getTotalOutcome(transactions: Transaction[] = []): number {
   return transactions
     .filter((t) => isOutcome(t.type))
