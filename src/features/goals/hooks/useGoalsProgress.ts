@@ -1,13 +1,13 @@
+import { getGoals } from '../api/goalsApi'
+import { deleteGoal } from '../api/deleteGoalApi'
+import { createGoal } from '../api/createGoalsApi'
+import { updateGoalSaved } from '../api/updateGoalApi'
 import {
   useQuery,
   useMutation,
   useQueryClient,
   type UseMutationResult,
 } from '@tanstack/react-query'
-import { getGoals } from '../api/goalsApi'
-import { createGoal } from '../api/createGoalsApi'
-import { updateGoalSaved } from '../api/updateGoalApi'
-import { deleteGoal } from '../api/deleteGoalApi'
 
 export const GOALS_KEY = ['goals-progress'] as const
 
@@ -17,6 +17,10 @@ export type GoalProgress = {
   target_amount: number
   saved: number
   percent: number
+}
+
+type MutationContext = {
+  previous: GoalProgress[] | undefined
 }
 
 function toGoalProgress(raw: {
@@ -38,6 +42,7 @@ function toGoalProgress(raw: {
     percent,
   }
 }
+
 export function useGoalsProgress() {
   return useQuery({
     queryKey: GOALS_KEY,
@@ -66,11 +71,17 @@ export function useCreateGoal(): UseMutationResult<
 export function useUpdateGoalSaved(): UseMutationResult<
   void,
   Error,
-  { id: string; saved: number }
+  { id: string; saved: number },
+  MutationContext
 > {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<
+    void,
+    Error,
+    { id: string; saved: number },
+    MutationContext
+  >({
     mutationFn: updateGoalSaved,
 
     onMutate: async ({ id, saved }) => {
@@ -95,8 +106,10 @@ export function useUpdateGoalSaved(): UseMutationResult<
       return { previous }
     },
 
-    onError: (_err, _vars, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(GOALS_KEY, ctx.previous)
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(GOALS_KEY, ctx.previous)
+      }
     },
 
     onSettled: () => {
@@ -105,10 +118,15 @@ export function useUpdateGoalSaved(): UseMutationResult<
   })
 }
 
-export function useDeleteGoal(): UseMutationResult<void, Error, string> {
+export function useDeleteGoal(): UseMutationResult<
+  void,
+  Error,
+  string,
+  MutationContext
+> {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<void, Error, string, MutationContext>({
     mutationFn: deleteGoal,
 
     onMutate: async (id) => {
@@ -120,8 +138,10 @@ export function useDeleteGoal(): UseMutationResult<void, Error, string> {
       return { previous }
     },
 
-    onError: (_err, _id, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(GOALS_KEY, ctx.previous)
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(GOALS_KEY, ctx.previous)
+      }
     },
   })
 }

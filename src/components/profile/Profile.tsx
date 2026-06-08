@@ -3,14 +3,14 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { AnimatePresence } from 'framer-motion'
-import { useFinanceStore } from '@/store/financeStore'
+import { formatCurrency } from '@/lib/utils/currency'
 import { getDashboardSummary } from '@/config/dashboardSummary'
 import SummaryCards from '@/components/summaryCarts/SummaryCarts'
 import AddGoalForm from '@/features/goals/components/AddGoalForm'
 import ProfileOverview from '@/components/profile/ProfileOverview'
 import EditSavedModal from '@/features/goals/components/EditSavedModal'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import { useGoalsProgress } from '@/features/goals/hooks/useGoalsProgress'
-import { formatCurrency } from '@/lib/utils/currency'
 
 type EditingGoal = {
   id: string
@@ -20,15 +20,11 @@ type EditingGoal = {
 }
 
 export default function Profile() {
-  const { data, isLoading } = useGoalsProgress()
-
-  const [openAdd, setOpenAdd] = useState(false)
-  const [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null)
-
-  // 🔥 فقط این خط fix شده
-  const transactions = useFinanceStore((state: any) => state.transactions)
-
-  const summaryItems = getDashboardSummary(transactions ?? [])
+  const { data: goals, isLoading } = useGoalsProgress(),
+    { data: transactions = [] } = useTransactions(),
+    [openAdd, setOpenAdd] = useState(false),
+    [editingGoal, setEditingGoal] = useState<EditingGoal | null>(null),
+    summaryItems = getDashboardSummary(transactions)
 
   return (
     <main className="min-h-screen bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
@@ -73,14 +69,14 @@ export default function Profile() {
             </div>
           )}
 
-          {!isLoading && (!data || data.length === 0) && (
+          {!isLoading && (!goals || goals.length === 0) && (
             <p className="py-4 text-center text-sm text-zinc-400 dark:text-zinc-500">
               No goals yet. Create your first one!
             </p>
           )}
 
           <div className="space-y-3">
-            {data?.map((goal) => (
+            {goals?.map((goal) => (
               <div
                 key={goal.id}
                 className="rounded-xl border border-zinc-100 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900/50"

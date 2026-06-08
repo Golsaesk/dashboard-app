@@ -13,6 +13,10 @@ import {
 
 export const FIXED_COSTS_KEY = ['fixed-costs'] as const
 
+type MutationContext = {
+  previous: FixedCost[] | undefined
+}
+
 export function useFixedCosts() {
   return useQuery({
     queryKey: FIXED_COSTS_KEY,
@@ -23,11 +27,12 @@ export function useFixedCosts() {
 export function useAddFixedCost(): UseMutationResult<
   FixedCost,
   Error,
-  Omit<FixedCost, 'id'>
+  Omit<FixedCost, 'id'>,
+  MutationContext
 > {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<FixedCost, Error, Omit<FixedCost, 'id'>, MutationContext>({
     mutationFn: addFixedCost,
 
     onMutate: async (payload) => {
@@ -46,22 +51,29 @@ export function useAddFixedCost(): UseMutationResult<
       return { previous }
     },
 
-    onSuccess: (real, _vars, ctx: any) => {
+    onSuccess: (real) => {
       qc.setQueryData<FixedCost[]>(FIXED_COSTS_KEY, (old = []) =>
         old.map((c) => (c.id.startsWith('optimistic-') ? real : c)),
       )
     },
 
-    onError: (_err, _vars, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(FIXED_COSTS_KEY, ctx.previous)
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(FIXED_COSTS_KEY, ctx.previous)
+      }
     },
   })
 }
 
-export function useRemoveFixedCost(): UseMutationResult<void, Error, string> {
+export function useRemoveFixedCost(): UseMutationResult<
+  void,
+  Error,
+  string,
+  MutationContext
+> {
   const qc = useQueryClient()
 
-  return useMutation({
+  return useMutation<void, Error, string, MutationContext>({
     mutationFn: removeFixedCost,
 
     onMutate: async (id) => {
@@ -73,8 +85,10 @@ export function useRemoveFixedCost(): UseMutationResult<void, Error, string> {
       return { previous }
     },
 
-    onError: (_err, _id, ctx: any) => {
-      if (ctx?.previous) qc.setQueryData(FIXED_COSTS_KEY, ctx.previous)
+    onError: (_err, _id, ctx) => {
+      if (ctx?.previous !== undefined) {
+        qc.setQueryData(FIXED_COSTS_KEY, ctx.previous)
+      }
     },
   })
 }

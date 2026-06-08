@@ -1,6 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
+import { useFixedCosts } from '@/features/fixedCosts/hooks/useFixedCosts'
 import {
   AlertCircle,
   TrendingUp,
@@ -8,8 +10,6 @@ import {
   Loader2,
   Brain,
 } from 'lucide-react'
-import { useTransactions } from '@/features/finance/hooks/useTransaction'
-import { useFixedCosts } from '@/features/fixedCosts/hooks/useFixedCosts'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -25,8 +25,7 @@ export default function AiFinanceStatusCard() {
     { data: fixedCosts = [] } = useFixedCosts(),
     [status, setStatus] = useState<Status>('idle'),
     [data, setData] = useState<AiFinanceResponse | null>(null)
-
-  async function fetchAnalysis() {
+  const fetchAnalysis = useCallback(async () => {
     if (!transactions.length) {
       setStatus('idle')
       return
@@ -49,11 +48,11 @@ export default function AiFinanceStatusCard() {
     } catch {
       setStatus('error')
     }
-  }
+  }, [transactions, fixedCosts])
 
   useEffect(() => {
     fetchAnalysis()
-  }, [transactions, fixedCosts])
+  }, [fetchAnalysis])
 
   const scoreColor =
     (data?.score ?? 0) > 20

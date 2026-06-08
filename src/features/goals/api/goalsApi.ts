@@ -8,22 +8,25 @@ export type GoalRow = {
   user_id: string
   created_at?: string
 }
-
 async function getUserId(): Promise<string> {
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  if (!session?.user) throw new Error('Not authenticated')
-  return session.user.id
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+
+  if (error || !user) throw new Error('Not authenticated')
+  return user.id
 }
 
 export async function getGoals(): Promise<GoalRow[]> {
   const userId = await getUserId()
+
   const { data, error } = await supabase
     .from('goals')
     .select('*')
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
+
   if (error) throw error
   return (data ?? []) as GoalRow[]
 }
