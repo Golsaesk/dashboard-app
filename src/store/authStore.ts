@@ -1,22 +1,19 @@
-  import { create } from 'zustand'
-  import { Session, User } from '@supabase/supabase-js'
+import { create } from 'zustand'
+import { User } from '@supabase/supabase-js'
 
-  type Plan = 'free' | 'pro'
+type Plan = 'free' | 'pro'
 
-  interface AuthState {
-    user: User | null
-    session: Session | null
-    plan: Plan
-    loading: boolean
+interface AuthState {
+  user: User | null
+  plan: Plan
+  loading: boolean
 
-    setAuth: (data: Partial<AuthState>) => void
-  }
+  setAuth: (data: Partial<AuthState>) => void
+}
+export const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  plan: 'free',
+  loading: true,
 
-  export const useAuthStore = create<AuthState>((set) => ({
-    user: null,
-    session: null,
-    plan: 'free',
-    loading: true,
-
-    setAuth: (data) => set((state) => ({ ...state, ...data })),
-  }))
+  setAuth: (data) => set((state) => ({ ...state, ...data })),
+}))
