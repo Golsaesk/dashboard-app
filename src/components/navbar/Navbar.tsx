@@ -5,9 +5,17 @@ import MenuContent from './MenuContent'
 import { usePathname } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import NotificationPopup from './NotificationPopup'
-import { Bell, BellRing, Menu } from 'lucide-react'
 import { mobileMenuItems } from '@/config/menu.config'
 import { useNotifications } from '@/hooks/useNotifications'
+import {
+  Bell,
+  BellRing,
+  Menu,
+  Search,
+  SlidersHorizontal,
+  Calendar,
+  ChevronDown,
+} from 'lucide-react'
 
 const titles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -48,33 +56,62 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="relative flex items-center justify-between border-b border-zinc-200 bg-white px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <header className="flex items-center justify-between gap-3 px-4 py-4 md:px-6 md:py-5 lg:px-8">
         <button
           onClick={() => setOpen(true)}
-          className="rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-100 lg:hidden dark:text-zinc-400 dark:hover:bg-zinc-800"
+          className="bg-card text-muted-foreground hover:bg-accent flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition lg:hidden"
         >
           <Menu size={20} />
         </button>
 
-        <div>
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-white">
-            {title}
-          </h1>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="hidden flex-1 sm:block">
+          <h1 className="text-foreground text-xl font-semibold md:text-2xl">
             Welcome back, {userName || '...'} 👋
-          </p>
+          </h1>
         </div>
 
-        <button
-          onClick={() => setNotifOpen(true)}
-          className="relative rounded-lg p-1.5 text-zinc-500 transition hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-        >
-          {unreadCount > 0 ? <BellRing size={20} /> : <Bell size={20} />}
+        <h1 className="text-foreground flex-1 text-lg font-semibold sm:hidden">
+          {title}
+        </h1>
 
-          {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button className="bg-card text-muted-foreground hover:bg-accent hidden h-10 w-10 items-center justify-center rounded-full shadow-sm transition sm:flex">
+            <Search size={18} />
+          </button>
+
+          <button className="bg-primary text-primary-foreground hidden h-10 w-10 items-center justify-center rounded-full shadow-sm transition hover:opacity-90 sm:flex">
+            <SlidersHorizontal size={18} />
+          </button>
+
+          <button className="bg-card text-muted-foreground hover:bg-accent hidden h-10 w-10 items-center justify-center rounded-full shadow-sm transition sm:flex">
+            <Calendar size={18} />
+          </button>
+
+          <button
+            onClick={() => setNotifOpen(true)}
+            className="bg-card text-muted-foreground hover:bg-accent relative flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition"
+          >
+            {unreadCount > 0 ? <BellRing size={18} /> : <Bell size={18} />}
+            {unreadCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-red-500" />
+            )}
+          </button>
+
+          <button className="bg-card hover:bg-accent hidden items-center gap-2 rounded-full px-2 py-1.5 shadow-sm transition lg:flex">
+            <div className="bg-primary text-primary-foreground flex h-8 w-8 items-center justify-center rounded-full text-xs font-semibold">
+              {(userName || 'U').slice(0, 1).toUpperCase()}
+            </div>
+            <div className="pr-1 text-left">
+              <p className="text-foreground text-sm leading-tight font-medium">
+                {userName || 'User'}
+              </p>
+              <p className="text-muted-foreground text-xs leading-tight">
+                {user?.email}
+              </p>
+            </div>
+            <ChevronDown size={16} className="text-muted-foreground" />
+          </button>
+        </div>
 
         <NotificationPopup
           open={notifOpen}

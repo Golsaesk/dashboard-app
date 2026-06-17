@@ -41,17 +41,17 @@ export default function NotificationPopup({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -12, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className="fixed top-14 right-4 z-50 w-96 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-xl dark:border-zinc-800 dark:bg-zinc-900"
+            className="card-shadow-md bg-card fixed top-16 right-4 z-50 w-[calc(100vw-2rem)] max-w-96 overflow-hidden rounded-2xl"
           >
-            <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-              <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+            <div className="border-border flex items-center justify-between border-b px-4 py-3">
+              <p className="text-foreground text-sm font-semibold">
                 Notifications
               </p>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={onMarkAll}
-                  className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="text-muted-foreground hover:bg-accent flex items-center gap-1 rounded-lg px-2 py-1 text-xs"
                 >
                   <CheckCheck className="h-3.5 w-3.5" />
                   Mark all
@@ -59,7 +59,7 @@ export default function NotificationPopup({
 
                 <button
                   onClick={onClose}
-                  className="rounded-lg p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  className="text-muted-foreground hover:bg-accent rounded-lg p-1"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -68,7 +68,7 @@ export default function NotificationPopup({
 
             <div className="max-h-80 overflow-auto p-2">
               {notifications.length === 0 ? (
-                <div className="py-10 text-center text-sm text-zinc-500">
+                <div className="text-muted-foreground py-10 text-center text-sm">
                   No notifications
                 </div>
               ) : (
@@ -79,22 +79,22 @@ export default function NotificationPopup({
                       whileHover={{ scale: 1.01 }}
                       whileTap={{ scale: 0.99 }}
                       onClick={() => onClick(n.id)}
-                      className={`w-full rounded-xl border p-3 text-left transition ${
-                        n.read
-                          ? 'border-zinc-100 bg-white dark:border-zinc-800 dark:bg-zinc-900'
-                          : 'border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800/40'
+                      className={`w-full rounded-xl p-3 text-left transition ${
+                        n.read ? 'bg-card' : 'bg-primary/5'
                       } `}
                     >
                       <div className="flex justify-between">
-                        <p className="text-sm font-medium text-zinc-900 dark:text-white">
+                        <p className="text-foreground text-sm font-medium">
                           {n.title}
                         </p>
-                        <span className="text-[10px] opacity-60">
+                        <span className="text-muted-foreground text-[10px] opacity-80">
                           {n.category}
                         </span>
                       </div>
 
-                      <p className="mt-1 text-xs text-zinc-500">{n.message}</p>
+                      <p className="text-muted-foreground mt-1 text-xs">
+                        {n.message}
+                      </p>
 
                       {!n.read && (
                         <span className="mt-2 inline-block h-2 w-2 rounded-full bg-red-500" />

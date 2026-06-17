@@ -24,19 +24,13 @@ const tabs: { key: Metric; label: string }[] = [
   { key: 'balance', label: 'Balance' },
 ]
 
-const metricColors: Record<Metric, string> = {
-  income: '#10b981',
-  cost: '#f43f5e',
-  balance: '#6366f1',
-}
-
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white px-3 py-2 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-      <p className="mb-1 text-xs font-medium text-zinc-400">{label}</p>
-      <p className="text-sm font-semibold text-zinc-900 dark:text-white">
+    <div className="card-shadow-md bg-card rounded-2xl px-4 py-2.5">
+      <p className="text-muted-foreground mb-1 text-xs font-medium">{label}</p>
+      <p className="text-foreground text-sm font-semibold">
         {formatCurrency(payload[0].value ?? 0)}
       </p>
     </div>
@@ -82,22 +76,36 @@ export default function FinanceChart({
     return Object.values(map)
   }, [transactions])
 
+  const total = useMemo(
+    () => data.reduce((sum, d) => sum + d[metric], 0),
+    [data, metric],
+  )
+
   return (
     <div className="space-y-5">
-      <div className="flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
-        {tabs.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setMetric(t.key)}
-            className={`flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-              metric === t.key
-                ? 'bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-white'
-                : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-muted-foreground text-sm">Total Balance</p>
+          <p className="text-foreground text-2xl font-bold">
+            {formatCurrency(total)}
+          </p>
+        </div>
+
+        <div className="bg-muted flex gap-1 rounded-full p-1">
+          {tabs.map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setMetric(t.key)}
+              className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition ${
+                metric === t.key
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="h-64 w-full sm:h-72">
@@ -105,20 +113,31 @@ export default function FinanceChart({
           <LineChart data={data}>
             <CartesianGrid
               strokeDasharray="3 3"
-              stroke="currentColor"
-              className="text-zinc-100 dark:text-zinc-800"
+              stroke="var(--border)"
               vertical={false}
             />
-            <XAxis dataKey="month" />
-            <YAxis tickFormatter={(v) => formatChartCurrency(v)} />
+            <XAxis
+              dataKey="month"
+              stroke="var(--muted-foreground)"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
+            <YAxis
+              tickFormatter={(v) => formatChartCurrency(v)}
+              stroke="var(--muted-foreground)"
+              fontSize={12}
+              tickLine={false}
+              axisLine={false}
+            />
             <Tooltip content={<CustomTooltip />} />
 
             <Line
               type="monotone"
               dataKey={metric}
-              stroke={metricColors[metric]}
-              strokeWidth={2}
-              dot={{ r: 4 }}
+              stroke="var(--primary)"
+              strokeWidth={2.5}
+              dot={{ r: 4, fill: 'var(--primary)', strokeWidth: 0 }}
               activeDot={{ r: 6 }}
             />
           </LineChart>

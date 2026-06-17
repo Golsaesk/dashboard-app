@@ -12,10 +12,10 @@ export function AddTransactionSheet() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex h-12 w-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 shadow-lg transition hover:bg-emerald-600 sm:h-auto sm:w-auto sm:px-5 sm:py-2.5"
+        className="bg-primary text-primary-foreground flex h-14 w-14 items-center justify-center gap-2 rounded-full shadow-lg transition hover:opacity-90 sm:h-auto sm:w-auto sm:rounded-2xl sm:px-5 sm:py-2.5"
       >
-        <Plus className="size-5 text-white" />
-        <span className="hidden text-sm font-medium text-white sm:inline">
+        <Plus className="size-6 sm:size-5" />
+        <span className="hidden text-sm font-medium sm:inline">
           Add Transaction
         </span>
       </button>
@@ -36,19 +36,19 @@ export function AddTransactionSheet() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-x-0 bottom-0 z-50 rounded-t-3xl border-t border-zinc-200 bg-white sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-2xl sm:border dark:border-zinc-700 dark:bg-zinc-900"
+              className="bg-card fixed inset-x-0 bottom-0 z-50 rounded-t-3xl sm:inset-x-auto sm:top-1/2 sm:bottom-auto sm:left-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-3xl"
             >
               <div className="flex justify-center pt-3 sm:hidden">
-                <div className="h-1 w-10 rounded-full bg-zinc-200 dark:bg-zinc-700" />
+                <div className="bg-muted h-1 w-10 rounded-full" />
               </div>
 
-              <div className="flex items-center justify-between border-b border-zinc-100 px-5 py-4 dark:border-zinc-800">
-                <h2 className="text-base font-semibold text-zinc-900 dark:text-white">
+              <div className="border-border flex items-center justify-between border-b px-5 py-4">
+                <h2 className="text-foreground text-base font-semibold">
                   Add Transaction
                 </h2>
                 <button
                   onClick={() => setOpen(false)}
-                  className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   <X size={18} />
                 </button>

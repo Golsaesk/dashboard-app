@@ -72,7 +72,7 @@ export function FeatureGate({
             {description}
           </p>
           <Link
-            href="/Pricing"
+            href="/pricing"
             className="inline-flex items-center rounded-xl bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:scale-[1.02] hover:opacity-90 dark:bg-white dark:text-black"
           >
             Upgrade to Pro
@@ -81,6 +81,7 @@ export function FeatureGate({
       </div>
     )
   }
+
   return (
     <div className="relative w-full min-w-0">
       <div className="pointer-events-none w-full blur-sm select-none">

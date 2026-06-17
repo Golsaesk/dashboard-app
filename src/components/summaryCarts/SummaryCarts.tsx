@@ -8,51 +8,55 @@ type Props = {
 
 export default function SummaryCards({ items }: Props) {
   return (
-    <div className="grid w-full grid-cols-2 gap-4 lg:grid-cols-4">
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((item) => {
+        const hasCompared = item.compared !== undefined
         const compared = item.compared ?? 0
         const isPositive = compared >= 0
 
         return (
           <div
             key={item.name}
-            className="flex flex-col rounded-2xl border border-zinc-200 bg-white p-5 transition hover:border-zinc-300 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700"
+            className="card-shadow bg-card hover:card-shadow-md flex flex-col rounded-3xl p-5 transition"
           >
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               {item.icon && (
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 dark:bg-zinc-800">
-                  <item.icon className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+                <div className="bg-primary text-primary-foreground flex h-9 w-9 items-center justify-center rounded-xl">
+                  <item.icon className="h-4 w-4" />
                 </div>
               )}
-              <p className="text-xs font-medium text-zinc-500 dark:text-zinc-400">
-                {item.name}
-              </p>
+              <p className="text-foreground text-sm font-medium">{item.name}</p>
             </div>
 
-            <h3 className="mt-4 text-xl font-semibold text-zinc-900 dark:text-white">
-              {item.value ? item.value : formatCurrency(Number(item.total) || 0)}
+            <h3 className="text-foreground mt-4 text-2xl font-semibold tracking-tight">
+              {item.value
+                ? item.value
+                : formatCurrency(Number(item.total) || 0)}
             </h3>
 
-            <div
-              className={`mt-2 flex items-center gap-1 text-xs font-medium ${
-                isPositive
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : 'text-red-500 dark:text-red-400'
-              }`}
-            >
-              {isPositive ? (
-                <ArrowUp className="h-3 w-3" />
-              ) : (
-                <ArrowDown className="h-3 w-3" />
-              )}
-              <span>
-      {formatCurrency(Math.abs(compared))}
-                
-              </span>
-              <span className="font-normal text-zinc-400 dark:text-zinc-500">
-                vs last month
-              </span>
-            </div>
+            {hasCompared && (
+              <div
+                className={`mt-2 flex items-center gap-1 text-xs font-medium ${
+                  isPositive ? 'text-primary' : 'text-red-500'
+                }`}
+              >
+                {isPositive ? (
+                  <ArrowUp className="h-3 w-3" />
+                ) : (
+                  <ArrowDown className="h-3 w-3" />
+                )}
+                <span>{formatCurrency(Math.abs(compared))}</span>
+                <span className="text-muted-foreground font-normal">
+                  vs last month
+                </span>
+              </div>
+            )}
+
+            {!hasCompared && (
+              <p className="text-muted-foreground mt-2 text-xs">
+                from last month
+              </p>
+            )}
           </div>
         )
       })}

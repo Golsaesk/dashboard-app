@@ -22,31 +22,60 @@ function isAuthRoute(path: string): boolean {
   return AUTH_PATHS.some((p) => path === p || path.startsWith(p + '/'))
 }
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+function isValidUrl(url: string | undefined): url is string {
+  if (!url) return false
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
+}
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return req.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            res.cookies.set(name, value, options)
-          })
-        },
+export async function middleware(req: NextRequest) {
+  const res = NextResponse.next(),
+    supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    configured = isValidUrl(supabaseUrl) && !!supabaseAnonKey,
+    path = req.nextUrl.pathname
+
+  if (!configured) {
+    console.error(
+      '[middleware] NEXT_PUBLIC_SUPABASE_URL and/or NEXT_PUBLIC_SUPABASE_ANON_KEY ' +
+        'are missing or invalid. Create .env.local from .env.local.example ' +
+        'and restart the dev server. Auth checks are skipped until then.',
+    )
+    if (isProtected(path)) {
+      const redirectUrl = new URL('/signin', req.url)
+      redirectUrl.searchParams.set('next', path)
+      return NextResponse.redirect(redirectUrl)
+    }
+    return res
+  }
+
+  const supabase = createServerClient(supabaseUrl!, supabaseAnonKey!, {
+    cookies: {
+      getAll() {
+        return req.cookies.getAll()
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => {
+          res.cookies.set(name, value, options)
+        })
       },
     },
-  )
+  })
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const {
+      data: { user: fetchedUser },
+    } = await supabase.auth.getUser()
+    user = fetchedUser
+  } catch (err) {
+    console.error('[middleware] Failed to fetch Supabase session:', err)
+  }
 
-  const path = req.nextUrl.pathname
   if (!user && isProtected(path)) {
     const redirectUrl = new URL('/signin', req.url)
     redirectUrl.searchParams.set('next', path)

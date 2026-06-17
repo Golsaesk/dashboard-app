@@ -12,7 +12,7 @@ type Goal = {
 export default function GoalChart({ goal }: { goal?: Goal }) {
   if (!goal) {
     return (
-      <div className="py-6 text-center text-sm text-zinc-400 dark:text-zinc-500">
+      <div className="text-muted-foreground py-6 text-center text-sm">
         No goal set
       </div>
     )
@@ -23,62 +23,61 @@ export default function GoalChart({ goal }: { goal?: Goal }) {
     Math.round((goal.saved_amount / safeTarget) * 100),
     100,
   )
-  const remaining = Math.max(safeTarget - goal.saved_amount, 0)
   const isCompleted = percent >= 100
   const data = [{ value: percent }, { value: 100 - percent }]
 
   return (
-    <div className="flex w-full items-center justify-between gap-6">
-      {/* Chart — سمت چپ */}
-      <div className="relative h-40 w-40 shrink-0">
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative h-44 w-full max-w-[260px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
-              innerRadius={45}
-              outerRadius={62}
-              startAngle={90}
-              endAngle={-270}
+              innerRadius="68%"
+              outerRadius="100%"
+              startAngle={180}
+              endAngle={0}
               dataKey="value"
               stroke="none"
+              cy="85%"
             >
-              <Cell fill="#10b981" />
-              <Cell
-                fill="currentColor"
-                className="text-zinc-100 dark:text-zinc-800"
-              />
+              <Cell fill="var(--primary)" />
+              <Cell fill="var(--muted)" />
             </Pie>
           </PieChart>
         </ResponsiveContainer>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <p className="text-lg font-semibold text-zinc-900 dark:text-white">
-            {percent}%
-          </p>
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2 text-center">
+          <p className="text-foreground text-3xl font-bold">{percent}%</p>
+          <p className="text-muted-foreground text-xs">Progress Percentage</p>
         </div>
       </div>
 
-      <div className="flex flex-1 flex-col items-center gap-3">
-        <div>
-          <h3 className="text-sm font-semibold text-zinc-900 dark:text-white">
-            {goal.title}
-          </h3>
-          <p className="mt-0.5 text-xs text-zinc-500 dark:text-zinc-400">
-            {isCompleted ? 'Completed 🎉' : 'In progress'}
-          </p>
+      <div className="border-border flex w-full items-center justify-between gap-4 border-t pt-4">
+        <div className="flex items-center gap-2">
+          <span className="bg-primary h-2.5 w-2.5 rounded-full" />
+          <div>
+            <p className="text-muted-foreground text-xs">Achieved</p>
+            <p className="text-foreground text-sm font-semibold">
+              {formatCurrency(goal.saved_amount)}
+            </p>
+          </div>
         </div>
-        <div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">Progress</p>
-          <p className="mt-0.5 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
-            {percent}%
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-zinc-400 dark:text-zinc-500">Saved</p>
-          <p className="mt-0.5 text-sm font-semibold text-zinc-900 dark:text-white">
-            {formatCurrency(goal.saved_amount)}
-          </p>
+        <div className="flex items-center gap-2">
+          <span className="bg-muted h-2.5 w-2.5 rounded-full" />
+          <div>
+            <p className="text-muted-foreground text-xs">Target</p>
+            <p className="text-foreground text-sm font-semibold">
+              {formatCurrency(goal.target_amount)}
+            </p>
+          </div>
         </div>
       </div>
+
+      {isCompleted && (
+        <p className="text-primary text-center text-xs font-medium">
+          🎉 Goal completed!
+        </p>
+      )}
     </div>
   )
 }

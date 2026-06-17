@@ -1,372 +1,243 @@
-# Dashboard — AI-Powered Personal Finance Tracker
+# UI Changes — Finova Style
 
-> Stop guessing. Understand your money with AI.
+## Failed to Fetch Error
 
-A full-stack personal finance dashboard that tracks income and expenses, analyzes spending patterns using AI, and sends daily financial reports directly to Telegram. Built with Next.js 16, Supabase, and Groq's LLaMA 3.3 70B.
+If you still encounter a **"Failed to fetch"** error, the issue is almost certainly caused by one of the following:
 
----
+- `.env.local` has not been created.
+- Environment variables are missing or invalid.
+- The development server was not restarted after updating `.env.local`.
 
-## Screenshots
+Because `AuthProvider` wraps the entire application and `useAuthInit` calls `supabase.auth.getUser()` during page initialization, this error can occur immediately when opening the application, even without clicking any buttons.
 
-> _Add your screenshots here after deployment_
+## Configuration Improvements
 
----
+### `src/lib/supabase/client.ts`
 
-## Features
+Added strict validation before creating the Supabase client:
 
-### Core
+- Verifies that `NEXT_PUBLIC_SUPABASE_URL` is a valid URL.
+- Verifies that `NEXT_PUBLIC_SUPABASE_ANON_KEY` is present.
 
-| Feature             | Description                                                                         |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| **Dashboard**       | Financial overview with summary cards, AI health score, and recent transactions     |
-| **Income**          | Log income entries with category tracking, charts, and goal progress                |
-| **Expenses**        | Record expenses, manage recurring monthly fixed costs, and view category breakdowns |
-| **Reports**         | Monthly spending trend charts and financial summaries                               |
-| **Financial Goals** | Set savings targets and track progress with visual progress bars                    |
-| **Settings**        | Profile management, currency preference, theme toggle, and account deletion         |
+If validation fails:
 
-### AI & Automation
+- A clear error message is logged to the console.
+- A new export, `supabaseConfigured`, is exposed for runtime checks.
 
-| Feature                   | Description                                                                                                                           |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **AI Financial Health**   | Real-time analysis of your finances with a score from −100 to 100, insights, and actionable suggestions powered by Groq LLaMA 3.3 70B |
-| **Daily Telegram Report** | On-demand AI-generated financial report sent directly to your Telegram chat                                                           |
-| **Smart Notifications**   | In-app toast notifications for upcoming fixed costs and important events                                                              |
+### `src/app/page.tsx`
 
-### Platform
+Before calling `signInAnonymously()`, the page checks `supabaseConfigured`.
 
-| Feature                | Description                                                                                          |
-| ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Demo Mode**          | Try the full app instantly — no account required (Supabase anonymous auth + localStorage)            |
-| **Light / Dark Theme** | Full dark mode support across all pages                                                              |
-| **Free / Pro Plans**   | Stripe-ready monetization with plan-gated features via `FeatureGate` component                       |
-| **Optimistic UI**      | All mutations update the UI instantly before the server responds, with automatic rollback on failure |
+If Supabase is not configured:
 
----
+- No request is sent.
+- A visible error message is displayed in the UI.
 
-## Tech Stack
+### `src/features/auth/hooks/useAuthInit.ts`
 
-| Layer               | Tool                                   | Version   |
-| ------------------- | -------------------------------------- | --------- |
-| Framework           | Next.js (App Router)                   | 16.x      |
-| Language            | TypeScript                             | 5.x       |
-| Database & Auth     | Supabase                               | 2.x       |
-| Server State        | TanStack React Query                   | 5.x       |
-| Client State        | Zustand                                | 5.x       |
-| Styling             | Tailwind CSS v4 + shadcn/ui + Radix UI | 4.x       |
-| Animation           | Framer Motion                          | 12.x      |
-| Charts              | Recharts                               | 3.x       |
-| Forms               | React Hook Form + Zod                  | 7.x / 3.x |
-| AI Provider         | Groq API (LLaMA 3.3 70B)               | —         |
-| Rate Limiting       | Upstash Redis (sliding window)         | 2.x       |
-| Payments            | Stripe (checkout sessions)             | —         |
-| Unit Tests          | Vitest                                 | 4.x       |
-| E2E Tests           | Playwright                             | 1.x       |
-| CI/CD               | GitHub Actions                         | —         |
-| Dead Code Detection | Knip                                   | 6.x       |
+- Validates configuration before calling `getUser()`.
+- Skips auth initialization when configuration is invalid.
+- Wraps initialization logic in `try/catch` to prevent unhandled promise rejections.
+
+### `src/middleware.ts`
+
+Added server-side validation.
+
+If environment variables are invalid:
+
+- Protected routes redirect to `/signin`.
+- Public routes continue to work normally.
+- A clear warning is logged in the Next.js server console.
 
 ---
 
-## Architecture
+## Setup Instructions
 
-### State Management
+1. Copy `.env.local.example` to `.env.local` in the project root.
 
-Two tools, one clear rule — **React Query owns server data, Zustand owns UI state**:
-
-| Data                       | Tool        | Reason                                         |
-| -------------------------- | ----------- | ---------------------------------------------- |
-| Auth (user, plan)          | Zustand     | Global UI state — no caching needed            |
-| Settings (theme, currency) | Zustand     | Local user preference                          |
-| Transactions               | React Query | Server state with caching + optimistic updates |
-| Fixed Costs                | React Query | Same                                           |
-| Goals                      | React Query | Same                                           |
-
-### Security
-
-Every API route is protected by two independent layers:
-
-1. **Middleware** — rejects unauthenticated requests before they reach route handlers
-2. **`requireAuth()`** — server-side `getUser()` call (verifies JWT with Supabase, not just from cookie) inside every API route
-
-All AI endpoints additionally enforce **rate limiting via Upstash Redis** (sliding window) and **Zod input validation**.
-
-### Project Structure
-
-```
-src/
-├── app/
-│   ├── (auth)/                 # Sign-in, OAuth callback
-│   ├── (main)/                 # Protected pages
-│   │   ├── dashboard/
-│   │   ├── income/
-│   │   ├── outcome/
-│   │   ├── reports/
-│   │   ├── profile/
-│   │   ├── setting/
-│   │   └── pricing/
-│   └── api/
-│       ├── ai-finance-status/  # POST — AI analysis
-│       └── daily-report/       # POST — Telegram report
-├── components/                 # Shared UI components
-├── features/                   # Feature modules (co-located API + hooks + components)
-│   ├── auth/
-│   ├── finance/
-│   ├── fixedCosts/
-│   └── goals/
-├── store/                      # Zustand stores
-├── lib/                        # Infrastructure (supabase, auth, rateLimit)
-├── helper/                     # Pure utility functions (finance, chart)
-├── hooks/                      # Shared React hooks
-├── providers/                  # React context providers
-├── schema/                     # Zod validation schemas
-└── type/                       # Shared TypeScript types
-```
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Node.js 18+
-- A [Supabase](https://supabase.com) project
-- A [Groq](https://console.groq.com) API key
-- (Optional) [Upstash Redis](https://console.upstash.com) database
-- (Optional) A Telegram bot token
-
-### 1. Clone and Install
-
-```bash
-git clone https://github.com/your-username/dashboard-app.git
-cd dashboard-app
-npm install
-```
-
-### 2. Environment Variables
-
-Create a `.env.local` file in the project root:
+2. From **Supabase Dashboard → Project Settings → API**, copy:
 
 ```env
-# ─── Supabase ──────────────────────────────────────────────────────────────
-# Get these from: https://supabase.com/dashboard → your project → Settings → API
-NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-# ─── Groq AI ───────────────────────────────────────────────────────────────
-# Get from: https://console.groq.com → API Keys
-GROQ_API_KEY=gsk_...
-
-# ─── Upstash Redis (rate limiting) ─────────────────────────────────────────
-# Get from: https://console.upstash.com → Create Database → REST API
-# App works without these, but AI endpoints won't be rate-limited
-UPSTASH_REDIS_REST_URL=https://your-db.upstash.io
-UPSTASH_REDIS_REST_TOKEN=AXxx...
-
-# ─── Telegram (daily reports) ──────────────────────────────────────────────
-# Create a bot via @BotFather on Telegram, then get the token
-# Users set their own Chat ID in Settings → Profile
-TELEGRAM_BOT_TOKEN=1234567890:ABCdefGHIjklMNOpqrsTUVwxyz
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxxx
 ```
 
-> **Tip:** `SUPABASE_SERVICE_ROLE_KEY` is only used server-side and never exposed to the browser. Never commit `.env.local` to version control.
+3. Ensure the Supabase project is active and not paused.
 
-### 3. Set Up the Database
-
-Run the following SQL in your **Supabase SQL Editor** (`https://supabase.com/dashboard → your project → SQL Editor`):
-
-#### Create Tables
-
-```sql
-create table profiles (
-  id              uuid references auth.users on delete cascade primary key,
-  full_name       text,
-  avatar_url      text,
-  plan            text not null default 'free' check (plan in ('free', 'pro')),
-  telegram_chat_id text,
-  created_at      timestamptz not null default now()
-);
-create table transactions (
-  id          uuid default gen_random_uuid() primary key,
-  user_id     uuid references auth.users on delete cascade not null,
-  amount      numeric not null check (amount >= 0),
-  type        text not null check (type in ('income', 'expense', 'cost')),
-  category    text not null,
-  date        date,
-  note        text,
-  source      text,
-  created_at  timestamptz not null default now()
-);
-
-create table fixed_costs (
-  id          uuid default gen_random_uuid() primary key,
-  user_id     uuid references auth.users on delete cascade not null,
-  title       text not null,
-  amount      numeric not null check (amount >= 0),
-  due_day     integer not null check (due_day between 1 and 31),
-  created_at  timestamptz not null default now()
-);
-create table goals (
-  id             uuid default gen_random_uuid() primary key,
-  user_id        uuid references auth.users on delete cascade not null,
-  title          text not null,
-  target_amount  numeric not null check (target_amount > 0),
-  saved_amount   numeric not null default 0 check (saved_amount >= 0),
-  created_at     timestamptz not null default now()
-);
-```
-
-#### Enable Row Level Security
-
-```sql
-alter table profiles    enable row level security;
-alter table transactions enable row level security;
-alter table fixed_costs  enable row level security;
-alter table goals        enable row level security;
-
-
-create policy "users_own_profile"      on profiles     for all using (auth.uid() = id);
-create policy "users_own_transactions" on transactions  for all using (auth.uid() = user_id);
-create policy "users_own_fixed_costs"  on fixed_costs   for all using (auth.uid() = user_id);
-create policy "users_own_goals"        on goals         for all using (auth.uid() = user_id);
-```
-
-#### Auto-Create Profile on Sign-Up (optional but recommended)
-
-```sql
-create or replace function public.handle_new_user()
-returns trigger as $$
-begin
-  insert into public.profiles (id, full_name, avatar_url)
-  values (
-    new.id,
-    new.raw_user_meta_data ->> 'full_name',
-    new.raw_user_meta_data ->> 'avatar_url'
-  );
-  return new;
-end;
-$$ language plpgsql security definer;
-
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.handle_new_user();
-```
-
-### 4. Enable Anonymous Sign-In
-
-In your Supabase dashboard: **Authentication → Providers → Anonymous** → Enable.
-
-This powers the **Demo Mode** — users can try the full app without creating an account.
-
-### 5. Run the App
+4. Restart the development server:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Next.js loads environment variables only during startup.
+
+5. If configuration is still missing, the homepage will display a clear error message instead of a generic fetch error.
 
 ---
 
-## Deployment (Vercel)
+# Files Included
 
-### One-Click Deploy
+Replace the following files in your project:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new)
+```text
+.env.local.example
 
-### Manual Steps
+src/lib/supabase/client.ts
+src/features/auth/hooks/useAuthInit.ts
+src/middleware.ts
 
-1. Push your code to GitHub
-2. Import the repository in [Vercel](https://vercel.com/new)
-3. Add all environment variables from `.env.local` under **Settings → Environment Variables**
-4. Deploy
+src/app/page.tsx
+src/app/globals.css
+src/app/(main)/layout.tsx
 
-> **Important:** Without the environment variables set in Vercel, the build will succeed but the app will fail at runtime. Make sure all variables — especially `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` — are added before the first deployment.
+src/components/navbar/MenuContent.tsx
+src/components/navbar/Navbar.tsx
+src/components/navbar/NotificationPopup.tsx
 
-### Supabase Auth Callback URL
+src/components/footer/Footer.tsx
 
-After deploying, add your production URL to Supabase:
+src/components/summaryCarts/SummaryCarts.tsx
 
-**Authentication → URL Configuration → Redirect URLs**
+src/components/dashboard/Dashboard.tsx
+src/components/dashboard/AiHighlight.tsx
 
+src/components/charts/Chart.tsx
+src/components/charts/GoalChart.tsx
+
+src/components/transaction/Transaction.tsx
+src/components/transaction/TransactionHistory.tsx
+src/components/transaction/AddTransactionSheet.tsx
 ```
-https://your-app.vercel.app/auth/callback
-https://your-app.vercel.app/**
+
+No schema, store, API route, or backend files were modified.
+
+---
+
+# UI Updates
+
+## Global Theme (`globals.css`)
+
+- Updated theme tokens to use the project's green palette.
+- Refined color variables for both light and dark mode.
+- Added:
+  - `card-shadow`
+  - `card-shadow-md`
+
+- Increased global border radius:
+
+```css
+--radius: 0.75rem;
 ```
 
----
-
-## Setting Up the Telegram Daily Report
-
-1. Open Telegram and search for **@BotFather**
-2. Send `/newbot` and follow the prompts to create a bot
-3. Copy the bot token and add it as `TELEGRAM_BOT_TOKEN` in your environment variables
-4. Start a chat with your new bot (send `/start`)
-5. Get your Chat ID by visiting: `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates`
-6. In the app, go to **Settings → Profile** and enter your Chat ID
-7. Click **Send Daily Report** from the Dashboard
+Dark mode remains fully supported through CSS variables.
 
 ---
 
-## Available Scripts
+## Sidebar (`MenuContent.tsx`)
+
+### Desktop
+
+- Compact icon rail layout.
+- Rounded icon buttons.
+- Hover tooltips.
+
+### Mobile
+
+- Existing drawer behavior preserved.
+- Uses theme tokens instead of hardcoded colors.
+
+---
+
+## Navbar (`Navbar.tsx`)
+
+- Added circular action buttons:
+  - Search
+  - Filter
+  - Calendar
+  - Notifications
+
+- User profile displayed as a rounded pill on desktop.
+
+---
+
+## Dashboard (`Dashboard.tsx`)
+
+- Redesigned into a two-column layout.
+- Main content area and secondary sidebar.
+- Added a balance card using the project's primary color.
+- Uses real application data instead of branded placeholders.
+
+---
+
+## Summary Cards (`SummaryCarts.tsx`)
+
+- Increased border radius.
+- Icons placed inside themed containers.
+- Improved spacing and hierarchy.
+
+---
+
+## Charts
+
+### `Chart.tsx`
+
+- Added pill-style tabs:
+  - Income
+  - Expenses
+  - Balance
+
+- Displays total balance above the chart.
+
+### `GoalChart.tsx`
+
+- Redesigned as a half-donut gauge.
+- Displays savings goal progress.
+
+---
+
+## Transactions
+
+### Updated Files
+
+- `Transaction.tsx`
+- `TransactionHistory.tsx`
+- `AddTransactionSheet.tsx`
+
+### Changes
+
+- Pill-style filters.
+- Rounded transaction rows.
+- Muted background surfaces.
+- Floating circular action button.
+
+---
+
+## Mobile Footer (`Footer.tsx`)
+
+- Softer shadows.
+- Larger corner radius.
+- Active navigation item displayed inside a pill-shaped container.
+
+---
+
+# Mobile-First Approach
+
+All components follow a mobile-first strategy:
+
+- Base styles target mobile devices.
+- `sm:`, `md:`, and `lg:` breakpoints only enhance larger screens.
+- No desktop-first overrides are used.
+
+---
+
+# Verification
+
+After replacing the files:
 
 ```bash
-# Start development server
+npm install
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
-
-# Lint
-npm run lint
-
-# Run unit tests (watch mode)
-npm test
-
-# Run unit tests with interactive UI
-npm run test:ui
-
-# Generate coverage report
-npm run test:coverage
-
-# Run E2E tests (requires running dev server)
-npx playwright test
-
-# Run E2E tests with UI
-npx playwright test --ui
-
-# Detect unused exports and dead code
-npx knip
 ```
 
----
-
-## Demo Mode
-
-Demo Mode uses Supabase's **anonymous authentication**. When a visitor clicks "Try Demo", they are silently signed in as an anonymous user — no email, no password, no friction.
-
-- All transaction, fixed cost, and goal data is stored in **localStorage** under scoped keys
-- Data is isolated per browser session
-- **AI features are disabled** in Demo Mode (anonymous users are blocked at the API level)
-- Upgrading from demo to a real account is handled by Supabase's `linkIdentity` flow
-
----
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
-
-Make sure all tests pass before submitting:
-
-```bash
-npm test && npx playwright test
-```
-
----
-
-## License
-
-[MIT](LICENSE)
+Build and dependency installation were not executed in this environment. Local verification is recommended after integration.
