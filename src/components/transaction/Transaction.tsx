@@ -2,75 +2,99 @@
 
 import { useMemo, useState } from 'react'
 import TransactionForm from './TransactionForm'
-import { ArrowUpDown, Plus, X } from 'lucide-react'
 import TransactionHistory from './TransactionHistory'
+import { useFilterContext } from '@/providers/FilterContext'
 import { TransactionListSkeleton } from '@/components/skeleton/Skeleton'
 import { useTransactions } from '@/features/finance/hooks/useTransaction'
-
-type Filter = 'all' | 'income' | 'expense' | 'cost'
-type Sort = 'latest' | 'earliest'
-
-const filterLabels: Record<Filter, string> = {
-  all: 'All',
-  income: 'Income',
-  expense: 'Expense',
-  cost: 'Cost',
-}
+import {
+  ArrowUpDown,
+  Plus,
+  X,
+  CalendarDays,
+  SlidersHorizontal,
+} from 'lucide-react'
 
 export default function Transaction() {
   const { data: transactions = [], isLoading } = useTransactions(),
     [open, setOpen] = useState(false),
-    [filter, setFilter] = useState<Filter>('all'),
-    [sort, setSort] = useState<Sort>('latest')
-
-  const processedItems = useMemo(() => {
-    let data = [...transactions].filter((t) => t?.type)
-    if (filter !== 'all') data = data.filter((t) => t.type === filter)
-    data.sort((a, b) =>
-      sort === 'latest'
-        ? new Date(b.date ?? 0).getTime() - new Date(a.date ?? 0).getTime()
-        : new Date(a.date ?? 0).getTime() - new Date(b.date ?? 0).getTime(),
-    )
-    return data
-  }, [transactions, filter, sort])
+    {
+      applyFilters,
+      hasActiveFilter,
+      hasActiveDateRange,
+      dateRange,
+      filter,
+      setFilter,
+    } = useFilterContext(),
+    processedItems = useMemo(
+      () => applyFilters(transactions),
+      [transactions, applyFilters],
+    ),
+    filterLabel = useMemo(() => {
+      const parts: string[] = []
+      if (dateRange.from || dateRange.to) {
+        const fmt = (d: Date | null) =>
+          d
+            ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            : '…'
+        parts.push(`${fmt(dateRange.from)} → ${fmt(dateRange.to)}`)
+      }
+      if (filter.types.length > 0) parts.push(filter.types.join(', '))
+      if (filter.amountMin || filter.amountMax)
+        parts.push(`$${filter.amountMin || '0'} – $${filter.amountMax || '∞'}`)
+      return parts.join(' · ')
+    }, [dateRange, filter]),
+    isFiltered = hasActiveFilter || hasActiveDateRange,
+    cycleSortOrder = () => {
+      const next =
+        filter.sort === 'latest'
+          ? 'earliest'
+          : filter.sort === 'earliest'
+            ? 'highest'
+            : filter.sort === 'highest'
+              ? 'lowest'
+              : 'latest'
+      setFilter({ ...filter, sort: next })
+    }
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-foreground text-base font-semibold">
-          Recent Transactions
-        </h2>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-muted flex rounded-full p-1">
-            {(['all', 'income', 'expense', 'cost'] as Filter[]).map((f) => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
-                  filter === f
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                {filterLabels[f]}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() =>
-              setSort((p) => (p === 'latest' ? 'earliest' : 'latest'))
-            }
-            className="bg-muted text-muted-foreground hover:text-foreground flex h-8 w-8 items-center justify-center rounded-full transition"
-          >
-            <ArrowUpDown size={14} />
-          </button>
+        <div>
+          <h2 className="text-foreground text-base font-semibold">
+            Recent Transactions
+          </h2>
+          {isFiltered && (
+            <p className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs">
+              {hasActiveDateRange && <CalendarDays size={10} />}
+              {hasActiveFilter && <SlidersHorizontal size={10} />}
+              <span className="max-w-[200px] truncate">{filterLabel}</span>
+              <span className="text-primary ml-1 shrink-0 font-medium">
+                · {processedItems.length} result
+                {processedItems.length !== 1 ? 's' : ''}
+              </span>
+            </p>
+          )}
         </div>
+        <button
+          onClick={cycleSortOrder}
+          className="bg-muted text-muted-foreground hover:text-foreground flex h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium transition"
+          title={`Sort: ${filter.sort}`}
+        >
+          <ArrowUpDown size={12} />
+          {filter.sort}
+        </button>
       </div>
-
       {isLoading ? (
         <TransactionListSkeleton />
+      ) : processedItems.length === 0 && isFiltered ? (
+        <div className="py-10 text-center">
+          <p className="text-muted-foreground text-sm">
+            No transactions match the current filter.
+          </p>
+          <p className="text-muted-foreground mt-1 text-xs">
+            Adjust the date range or filters in the top bar.
+          </p>
+        </div>
       ) : (
         <TransactionHistory items={processedItems} />
       )}

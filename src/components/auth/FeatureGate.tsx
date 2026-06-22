@@ -1,6 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
 import { Lock, Loader2, Sparkles } from 'lucide-react'
@@ -20,46 +21,21 @@ export function FeatureGate({
   description = 'Upgrade to Pro to unlock this feature.',
   fallback,
 }: FeatureGateProps) {
-  const plan = useAuthStore((s) => s.plan)
-  const [loading, setLoading] = useState(false)
+  const plan = useAuthStore((s) => s.plan),
+    [loading, setLoading] = useState(false),
+    router = useRouter()
 
   if (plan === 'pro') return <>{children}</>
   if (fallback) return <>{fallback}</>
 
-  const handleUpgrade = async () => {
-    try {
-      setLoading(true)
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
-      if (!session?.user) {
-        window.location.href = '/signin'
-        return
-      }
-
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: session.user.id,
-          email: session.user.email,
-        }),
-      })
-      if (!res.ok) throw new Error('Failed to create checkout session')
-      const data = await res.json()
-      window.location.href = data.url
-    } catch (err) {
-      console.error(err)
-      alert('Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  const handleUpgrade = () => {
+    router.push('/pricing')
   }
 
   if (variant === 'page') {
     return (
       <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-zinc-100 p-6 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
-        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl" />
+        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 bg-red-500 blur-3xl" />
         <div className="relative flex flex-col items-center text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white dark:bg-white dark:text-black">
             <Lock className="h-6 w-6" />
@@ -72,6 +48,7 @@ export function FeatureGate({
             {description}
           </p>
           <Link
+            rel="preload"
             href="/pricing"
             className="inline-flex items-center rounded-xl bg-black px-5 py-2.5 text-sm font-medium text-white transition hover:scale-[1.02] hover:opacity-90 dark:bg-white dark:text-black"
           >

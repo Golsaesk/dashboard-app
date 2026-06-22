@@ -1,76 +1,118 @@
 'use client'
 
 import { useEffect } from 'react'
-import { User } from '@supabase/supabase-js'
 import { useAuthStore } from '@/store/authStore'
+import type { User } from '@supabase/supabase-js'
 import { supabase, supabaseConfigured } from '@/lib/supabase/client'
 
 type Plan = 'free' | 'pro'
 
 async function resolveAuthState(user: User | null) {
-  const isDemo = user?.is_anonymous === true
   let plan: Plan = 'free'
 
+  const isDemo = user?.is_anonymous === true
+
   if (user && !isDemo) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('plan')
-      .eq('id', user.id)
-      .single()
-    plan = data?.plan ?? 'free'
+    try {
+      const { data } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single()
+
+      plan = (data?.plan as Plan) ?? 'free'
+    } catch {
+      plan = 'free'
+    }
   }
 
-  return { user, plan }
+  return {
+    user,
+    plan,
+  }
 }
 
 export function useAuthInit() {
-  const setAuth = useAuthStore((s) => s.setAuth)
+  const setAuth = useAuthStore((state) => state.setAuth)
 
   useEffect(() => {
     if (!supabaseConfigured) {
-      console.error(
-        '[Auth] Skipping Supabase session check: NEXT_PUBLIC_SUPABASE_URL ' +
-          'and/or NEXT_PUBLIC_SUPABASE_ANON_KEY are missing or invalid. ' +
-          'Create .env.local from .env.local.example and restart the dev server.',
-      )
-      setAuth({ user: null, plan: 'free', loading: false })
+      console.error('[Auth] Missing Supabase configuration. Check .env.local.')
+
+      setAuth({
+        user: null,
+        plan: 'free',
+        loading: false,
+      })
+
       return
     }
 
-    let unsubscribe: (() => void) | undefined
+    let mounted = true
 
-    async function init() {
+    async function initialize() {
       try {
         const {
-          data: { user },
-        } = await supabase.auth.getUser()
+          data: { session },
+        } = await supabase.auth.getSession()
+
+        const user = session?.user ?? null
 
         const { plan } = await resolveAuthState(user)
-        setAuth({ user, plan, loading: false })
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('[Auth] Failed to fetch session:', err)
-        setAuth({ user: null, plan: 'free', loading: false })
+
+        if (!mounted) return
+
+        setAuth({
+          user,
+          plan,
+          loading: false,
+        })
+      } catch (error) {
+        console.error('[Auth] Initialization failed:', error)
+
+        if (!mounted) return
+
+        setAuth({
+          user: null,
+          plan: 'free',
+          loading: false,
+        })
       }
     }
 
-    init()
+    initialize()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_, session) => {
+      const user = session?.user ?? null
+
       try {
-        const user = session?.user ?? null
         const { plan } = await resolveAuthState(user)
-        setAuth({ user, plan, loading: false })
-      } catch (err) {
-        console.error('[Auth] Failed to resolve auth state change:', err)
-        setAuth({ user: null, plan: 'free', loading: false })
+
+        if (!mounted) return
+
+        setAuth({
+          user,
+          plan,
+          loading: false,
+        })
+      } catch (error) {
+        console.error('[Auth] State change failed:', error)
+
+        if (!mounted) return
+
+        setAuth({
+          user,
+          plan: 'free',
+          loading: false,
+        })
       }
     })
 
-    unsubscribe = () => subscription.unsubscribe()
-
-    return () => unsubscribe?.()
+    return () => {
+      mounted = false
+      subscription.unsubscribe()
+    }
   }, [setAuth])
 }

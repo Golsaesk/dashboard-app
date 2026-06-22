@@ -117,6 +117,9 @@ export default function ProfileInformation() {
             alt="Profile"
             fill
             className="object-cover"
+            priority
+            width={1200}
+            height={600}
             unoptimized
           />
         </div>
