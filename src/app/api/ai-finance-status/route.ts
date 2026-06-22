@@ -48,7 +48,7 @@ function normalizeFixedCosts(
 }
 
 function buildFinancialContext(
-  transactions: any[],
+  transactions: z.infer<typeof transactionSchema>[],
   fixedCosts: NormalizedFixedCost[],
 ) {
   const income = transactions

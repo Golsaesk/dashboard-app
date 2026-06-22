@@ -1,59 +1,39 @@
 'use client'
 
-import { useEffect, useMemo } from 'react'
-
+import { useMemo } from 'react'
 import AiHighlight from './AiHighlight'
-import AiFinanceStatusCard from './AiFinanceStatusCard'
-
 import Chart from '@/components/charts/Chart'
 import GoalChart from '@/components/charts/GoalChart'
-import SummaryCards from '@/components/summaryCarts/SummaryCarts'
-import Transaction from '@/components/transaction/Transaction'
-import DailyReportButton from '@/components/dashboard/DailyReportButton'
+import { formatCurrency } from '@/lib/utils/currency'
+import AiFinanceStatusCard from './AiFinanceStatusCard'
 import ActiveFilterBadge from '../navbar/Activefilterbadge'
 import { FeatureGate } from '@/components/auth/FeatureGate'
-import { CardsGridSkeleton } from '@/components/skeleton/Skeleton'
-
-import { useTransactions } from '@/features/finance/hooks/useTransaction'
 import { useFilterContext } from '@/providers/FilterContext'
-
-import { formatCurrency } from '@/lib/utils/currency'
-import { getDashboardSummary } from '@/config/dashboardSummary'
-import { getTotalIncome, getNetSaving } from '@/helper/finance'
 import UpcomingFixedCosts from '../outcome/UpcomingFixedCosts'
+import Transaction from '@/components/transaction/Transaction'
+import { getTotalIncome, getNetSaving } from '@/helper/finance'
+import { getDashboardSummary } from '@/config/dashboardSummary'
+import SummaryCards from '@/components/summaryCarts/SummaryCarts'
+import { CardsGridSkeleton } from '@/components/skeleton/Skeleton'
+import DailyReportButton from '@/components/dashboard/DailyReportButton'
+import { useTransactions } from '@/features/finance/hooks/useTransaction'
 
 export default function Dashboard() {
-  const {
-    data: transactions = [],
-    isLoading: loading,
-    refetch,
-  } = useTransactions()
-
-  const { applyFilters, hasActiveFilter, hasActiveDateRange } =
-    useFilterContext()
-
-  useEffect(() => {
-    refetch()
-  }, [refetch])
-
-  const filteredTransactions = useMemo(
-    () => applyFilters(transactions),
-    [transactions, applyFilters],
-  )
-
-  const summaryItems = getDashboardSummary(filteredTransactions)
-
-  const totalIncome = getTotalIncome(filteredTransactions)
-
-  const netSaving = getNetSaving(filteredTransactions)
-
-  const savingsGoal = {
-    title: 'Savings Progress',
-    target_amount: Math.max(totalIncome, 1),
-    saved_amount: Math.max(netSaving, 0),
-  }
-
-  const isFiltered = hasActiveFilter || hasActiveDateRange
+  const { data: transactions = [], isLoading: loading } = useTransactions(),
+    { applyFilters, hasActiveFilter, hasActiveDateRange } = useFilterContext(),
+    filteredTransactions = useMemo(
+      () => applyFilters(transactions),
+      [transactions, applyFilters],
+    ),
+    summaryItems = getDashboardSummary(filteredTransactions),
+    totalIncome = getTotalIncome(filteredTransactions),
+    netSaving = getNetSaving(filteredTransactions),
+    savingsGoal = {
+      title: 'Savings Progress',
+      target_amount: Math.max(totalIncome, 1),
+      saved_amount: Math.max(netSaving, 0),
+    },
+    isFiltered = hasActiveFilter || hasActiveDateRange
 
   return (
     <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 lg:px-6">

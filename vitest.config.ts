@@ -1,16 +1,20 @@
-import { defineConfig } from 'vitest/config'
 import path from 'path'
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
-  test: {
-    environment: 'node',
-    globals: true,
-    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['node_modules', '.next', 'tests/e2e/**'],
-  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+
+  test: {
+    globals: true,
+    setupFiles: ['./tests/setup.ts'],
+    environment: 'jsdom',
+
+    include: ['tests/**/*.test.ts', 'tests/**/*.test.tsx'],
+
+    exclude: ['e2e', 'node_modules', '.next'],
   },
 })

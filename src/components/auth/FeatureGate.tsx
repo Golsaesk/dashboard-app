@@ -1,10 +1,9 @@
 'use client'
+
 import Link from 'next/link'
-import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
+import { Lock, Sparkles } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
-import { Lock, Loader2, Sparkles } from 'lucide-react'
 
 type FeatureGateProps = {
   children: React.ReactNode
@@ -22,7 +21,6 @@ export function FeatureGate({
   fallback,
 }: FeatureGateProps) {
   const plan = useAuthStore((s) => s.plan),
-    [loading, setLoading] = useState(false),
     router = useRouter()
 
   if (plan === 'pro') return <>{children}</>
@@ -35,7 +33,7 @@ export function FeatureGate({
   if (variant === 'page') {
     return (
       <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-gradient-to-br from-zinc-50 to-zinc-100 p-6 dark:border-zinc-800 dark:from-zinc-900 dark:to-zinc-950">
-        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 bg-red-500 blur-3xl" />
+        <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-purple-500/10 blur-3xl" />
         <div className="relative flex flex-col items-center text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-black text-white dark:bg-white dark:text-black">
             <Lock className="h-6 w-6" />
@@ -77,17 +75,9 @@ export function FeatureGate({
           </p>
           <button
             onClick={handleUpgrade}
-            disabled={loading}
-            className="flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:scale-[1.02] hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+            className="flex items-center justify-center gap-2 rounded-xl bg-zinc-900 px-4 py-2 text-xs font-medium text-white transition hover:scale-[1.02] hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Redirecting…
-              </>
-            ) : (
-              'Upgrade to Pro'
-            )}
+            Upgrade to Pro
           </button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { footerItems } from '@/config/footer.config'
 import { desktopMenuItems } from '@/config/menu.config'
 import MenuContent from '@/components/navbar/MenuContent'
 import { FilterProvider } from '@/providers/FilterContext'
+import { ErrorBoundary } from '@/components/error/ErrorBoundary'
 
 export default function MainLayout({
   children,
@@ -24,7 +25,7 @@ export default function MainLayout({
         <div className="flex min-w-0 flex-1 flex-col">
           <Navbar />
           <main className="flex-1 px-4 pb-24 md:px-6 md:pb-6 lg:px-8 lg:pb-8">
-            {children}
+            <ErrorBoundary>{children}</ErrorBoundary>
           </main>
           <div className="lg:hidden">
             <Footer items={footerItems} />

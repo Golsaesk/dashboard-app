@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/authStore'
+import { supabase } from '@/lib/supabase/client'
 
 export function useAccountActions() {
   const [deleting, setDeleting] = useState(false),
@@ -18,7 +18,6 @@ export function useAccountActions() {
 
     setAuth({
       user: null,
-      session: null,
       loading: false,
       plan: 'free',
     })
