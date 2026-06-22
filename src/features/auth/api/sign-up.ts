@@ -5,7 +5,7 @@ export async function signUp(email: string, password: string) {
     email,
     password,
     options: {
-      emailRedirectTo: 'http://localhost:3000/callback',
+      emailRedirectTo: 'https://dashboard-app-9u85.vercel.app/callback',
     },
   })
 

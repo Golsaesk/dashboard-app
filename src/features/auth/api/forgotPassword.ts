@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase/client'
 
 export async function forgotPassword(email: string) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'http://localhost:3000/reset-password',
+    redirectTo: 'https://dashboard-app-9u85.vercel.app/reset-password',
   })
 
   if (error) {

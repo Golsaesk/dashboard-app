@@ -109,7 +109,7 @@ Required tables: `transactions`, `fixed_costs`, `goals`, `profiles`.
 npm run dev
 ```
 
-The app starts at `http://localhost:3000`. If `NEXT_PUBLIC_SUPABASE_URL` is missing or invalid, the homepage shows a configuration error instead of silently failing.
+The app starts at `https://dashboard-app-9u85.vercel.app/`. If `NEXT_PUBLIC_SUPABASE_URL` is missing or invalid, the homepage shows a configuration error instead of silently failing.
 
 ## Scripts
 
